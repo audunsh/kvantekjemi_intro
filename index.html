@@ -1,0 +1,786 @@
+<!doctype html>
+<html>
+
+<head>
+
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Et første møte med kvantefysikk</title>
+
+    <link rel="stylesheet" href="dist/reset.css">
+    <link rel="stylesheet" href="dist/reveal.css">
+    <link rel="stylesheet" href="dist/theme/white.css">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="plugin/highlight/zenburn.css">
+    <script src="./driver.js"></script>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+
+            <section data-background-image="graphics/graded_background_1176.png" data-background-opacity=1>
+                <h1 class="r-fit-text">
+                    <font color="#008888">En lett introduksjon til</font>
+                    <font color="#FFFFFF">kvantekjemi</font>
+                </h1>
+                <h2>
+                    <span style="background-color: #008888">&nbsp; en reise fra stort til smått &nbsp;</span>
+                </h2>
+                <small>
+                    <span style="color: #FFFFFF">&nbsp; Audun Skau Hansen ( R&D Engineer hos Imerso, tidl. førstelektor
+                        v. KURT/UiO/Hylleraas) &nbsp;</span>
+                </small>
+                <p></p>
+            </section>
+
+            <section data-auto-animate data-background-color="#114433">
+                <img data-src="graphics/hylleraas-–-logo-–-white-– screen-–-rgb.png" height='150px' align='center'>
+                <p></p>
+                <b>Hylleraas-senteret for teoretisk kjemi</b> er et <a
+                    href="https://www.forskningsradet.no/sok-om-finansiering/midler-fra-forskningsradet/sff/">senter for
+                    fremragende forskning</a>,
+                hvor det utvikles og anvendes simuleringsmetoder for å forstå, tolke og forutsi ny kjemi, fysikk og
+                biologi for molekyler i komplekse og ekstreme miljøer.
+                <p></p>
+            </section>
+
+            <section data-background-color="#FFFFE0">
+                <img src="graphics/research.png" width="80%">
+                <p></p>
+                Forskningstema ved Hylleraas
+
+            </section>
+
+
+            <section data-background-image="graphics/galaxy_in_a_bottle.png">
+                <p></p>
+                <h1 class="r-fit-text">
+                    <font color="#008888">Hvordan</font>
+                    <font color="#FFFFFF">simulere</font>
+                    <font color="#008888">et univers?</font>
+                </h1>
+                <p></p>
+                <p>&nbsp;</p>
+            </section>
+
+
+
+
+
+
+            <section data-background-image="graphics/dandelion.png">
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <div align="left">
+                    <font color="#008888">Universet er</font>
+                    <font color="BBBBAA"> dynamisk</font>
+                </div>
+            </section>
+
+
+
+
+            <section data-background-iframe="https://viviariums.com/projects/snowflake/interactive/">
+                <img data-src="graphics/qr_vivarium.png" height='100px' align='left'>
+                <p></p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <font color="#BBBBAA">...og har</font>
+                <font color="#ffffff"> struktur</font>
+                <p></p>
+            </section>
+
+            <section data-background-image="graphics/dark_0.200000.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <h5>
+                    <font color="#c5ad73">1920: et puslespill</font>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/graded_background_2.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <img src="graphics/dalton.jpeg" width="30%">
+                <h5>
+                    <font color="#c5ad73">Daltons atomære hypotese</font>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/graded_background_2.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <img src="graphics/decay_2.png" width="45%">
+                <img src="graphics/decay_4.png" width="45%">
+
+                <h5>
+                    <font color="#c5ad73">Absorpsjon og emisjon</font>
+                </h5>
+            </section>
+
+            <section data-background-color="#253348" data-auto-animate>
+                <img src="graphics/plum_pudding.png" width="30%">
+                <img src="graphics/figure_1.png" width="30%">
+                <img src="graphics/figure_2.png" width="30%">
+                <font color="#ffffcc">Rutherford og Geiger-Marsden eksperimentet (ca.1909): har atomer struktur?</i>
+                </font>
+            </section>
+
+            <section data-background-image="graphics/dark_0.800000.png" data-background-opacity=1.0
+                data-background-size="110%">
+
+                <img src="graphics/doubleslit3.png" width="30%">
+                <img src="graphics/doubleslit4.png" width="30%">
+                <img src="graphics/doubleslit10.png" width="30%">
+                <h5>
+                    <font color="#c5ad73">Partikler kan ha </font>
+                    <font color="#ffffff">bølgeegenskaper [simulering]</font>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/dark_0.200000.png" data-background-opacity=1.0
+                data-background-size="110%">
+
+                <img src="graphics/hydrogen_Classical.png" width="50%">
+                <h5>
+                    <font color="#c5ad73">Hydrogen er </font>
+                    <font color="#ffffff">stabilt</font>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/wavepcket_.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+
+                <h5>
+                    <font color="#000023">Louis De Broglies bølger (1924)</font>
+                </h5>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/backdrop_general_3.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <font color="#ffffff">
+                    $(-\frac{\hbar^2}{2m}\frac{\partial^2 }{\partial x^2} + V(x) ) \Psi = i \hbar \frac{\partial
+                    }{\partial t}\Psi$
+                </font>
+                <p>&nbsp;</p>
+                <h5>
+                    <font color="#c5ad73">Erwin Schrödingers likning (1925)</font>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/graded_background_2.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <img src="graphics/wavefunction_8.png" width="120%">
+
+                <h5>
+                    <font color="#c5ad73">Max Borns fortolkning (1926)</font>
+                </h5>
+            </section>
+
+
+            <section data-background-image="graphics/backdrop_kjm_6.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <img src="graphics/debroglie.webp" height="300px">
+                <img src="graphics/schrodinger.jpg" height="300px">
+                <img src="graphics/max_born.jpg" height="300px">
+            </section>
+
+
+
+
+
+
+            <section data-background-image="graphics/dark_0.300000.png" data-background-opacity=1.0
+                data-background-size="110%">
+
+                <img src="graphics/hydrogen_Classical.png" width="30%">
+                <img src="graphics/hydrogen_Classical.png" width="30%">
+                <h5>
+                    <font color="#c5ad73">H$_2$ er </font>
+                    <font color="#ffffff">stabilt</font>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/lab_blur.jpg" data-auto-animate>
+                <img src="graphics/sphere.png" width=500px>
+                <div align="center">
+                    <font color="#008888">En reise i skala</font>
+                </div>
+            </section>
+
+            <section data-background-image="graphics/lab_blur.jpg" data-auto-animate>
+                <img src="graphics/world_shrinked_5.png" width=500px>
+                <div align="center">
+                    <font color="#008888">En reise i skala</font>
+                </div>
+            </section>
+
+            <section data-background-image="graphics/lab_blur_dim.jpg">
+                <img src="graphics/world_shrinked_3.png" height='200%'>
+                <font color="#008888">Hvordan er det å krympe?</font>
+            </section>
+
+            <section data-background-color="#002222" data-auto-animate>
+                <img src="graphics/sphere_shrinked.png" width=500px>
+                <p></p>
+            </section>
+
+            <section data-background-color="#002222" data-auto-animate>
+                <img src="graphics/sphere_shrinked.png" width=10px>
+                <p></p>
+            </section>
+
+
+            <section data-background-color="#002222" data-auto-animate>
+                <img src="graphics/sphere_shrinked.png" width=10px>
+                <p></p>
+                <font color="#ffffcc"><i class="fas fa-question-circle"></i></font>
+                <font color="#c5ad73">Kan alt i naturen </font>
+                <font color="#ffffcc">sanses? </font>
+            </section>
+
+            <section data-background-color="#002222" data-auto-animate>
+                <img src="graphics/sphere_shrinked.png" width=10px>
+                <p></p>
+                <font color="#22FFBB">Små øyne</font>
+                <font color="#008888"> slipper inn </font>
+                <font color="#22FFBB"> lite lys.</font>
+            </section>
+
+            <section data-background-color="#002222" data-auto-animate>
+                <img src="graphics/sphere_shrinked.png" width=10px>
+                <p></p>
+                <font color="#22FFBB">Lavt trykk</font>
+                <font color="#008888"> gir </font>
+                <font color="#22FFBB"> få naboer.</font>
+            </section>
+
+            <section data-background-color="#002222" data-auto-animate>
+                <img src="graphics/sphere_shrinked.png" width=10px>
+                <p></p>
+                <font color="#22FFBB">[simulering]</font>
+            </section>
+
+
+            <section data-background-iframe="https://paveldogreat.github.io/WebGL-Fluid-Simulation/">
+                <img data-src="graphics/liquid_qr.png" height='100px' align='left'>
+            </section>
+
+            <section data-background-image="graphics/dark_0.900000.png" data-background-opacity=1.0>
+                <h2>
+                    <font color="#BBBBAA"></font>
+                </h2>
+                <font color="#BBBBAA"> Hva er forskjellen på </font>
+                <font color="#ffffff"> væske</font>
+                <font color="#BBBBAA"> og </font>
+                <font color="ffffff"> gass?</font>
+                <p></p>
+                <font color="#BBBBAA"> Beskriv med egne ord.</font>
+            </section>
+
+            <section data-background-color="#002222">
+                <img src="graphics/sphere_move_1.png" width=250px>
+                <img src="graphics/sphere_move_3.png" width=310px>
+                <img src="graphics/sphere_move_2.png" width=250px>
+
+                <p></p>
+            </section>
+
+            <section data-background-image="graphics/earth-shattered.jpeg" data-background-opacity=.5>"If, in some
+                cataclysm, all of scientific knowledge were to be destroyed, and only one sentence passed on to the next
+                generation of creatures, what statement would contain the most information in the fewest words?(...)"
+            </section>
+
+            <section data-auto-animate>
+                <img src="graphics/feynman.jpeg" height='260px'>
+                <p></p>
+                "(...) all things are made of atoms — little particles that move around in perpetual motion, attracting
+                each other when they are a little distance apart, but repelling upon being squeezed into one another."
+                </table>
+            </section>
+
+            <section data-auto-animate>
+                <img src="graphics/feynman.jpeg" height='260px'>
+                <p></p>
+                "(...) all things are made of <font color="#008888">atoms</font> — little particles that move around in
+                perpetual motion, attracting each other when they are a little distance apart, but repelling upon being
+                squeezed into one another."
+                </table>
+            </section>
+
+            <section data-auto-animate>
+                <img src="graphics/feynman.jpeg" height='260px'>
+                <p></p>
+                "(...) all things are made of <font color="#008888">atoms</font> — little particles that move around in
+                perpetual motion, <font color="#008888">attracting each other when they are a little distance apart, but
+                    repelling upon being squeezed into one another.</font>"
+                </table>
+            </section>
+
+            <section data-background-image="graphics/dark_0.300000.png" data-background-opacity=1.0
+                data-background-size="110%">
+
+
+
+                <font color="#BBBBAA"> $\mathbf{F}_{ij} = \epsilon [( \frac{\sigma}{r_{ij}})^6 -
+                    (\frac{\sigma}{r_{ij}} )^{12} ] \frac{\mathbf{r_{ij}}}{ r_{ij}^2 }. $</font>
+                <p>&nbsp;</p>
+
+
+                <h5>
+                    <font color="#ffffff">Lennard-Jones </font>
+                    <font color="#c5ad73">krefter </font>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/graded_background_2.png" data-background-opacity=1.0
+                data-background-size="120%">>
+                <div style="width: 800px; margin: 0 auto;">
+                    <div>
+                        <label for="epsilon" style="color: white;">Well Depth (ε): <span
+                                id="epsilonValue">1.00</span></label>
+                        <input type="range" id="epsilon" min="0.1" max="2" step="0.1" value="1">
+                    </div>
+                    <div>
+                        <label for="sigma" style="color: white;">Distance Parameter (σ): <span
+                                id="sigmaValue">1.00</span></label>
+                        <input type="range" id="sigma" min="0.5" max="2" step="0.1" value="1">
+                    </div>
+                    <canvas id="ljPotential"></canvas>
+                </div>
+
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const epsilonInput = document.getElementById('epsilon');
+                        const sigmaInput = document.getElementById('sigma');
+                        const epsilonValue = document.getElementById('epsilonValue');
+                        const sigmaValue = document.getElementById('sigmaValue');
+                        const ctx = document.getElementById('ljPotential').getContext('2d');
+
+                        let chart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                datasets: [{
+                                    label: 'Lennard-Jones Potential',
+                                    borderColor: 'white',
+                                    borderWidth: 2,
+                                    pointRadius: 0,
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Distance (r/σ)',
+                                            color: 'white'
+                                        },
+                                        ticks: { color: 'white' },
+                                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                                    },
+                                    y: {
+                                        title: {
+                                            display: true,
+                                            text: 'Potential Energy (V/ε)',
+                                            color: 'white'
+                                        },
+                                        ticks: { color: 'white' },
+                                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                                    }
+                                },
+                                plugins: {
+                                    legend: { display: false }
+                                }
+                            }
+                        });
+
+                        function calculatePotential(r, epsilon, sigma) {
+                            const term1 = Math.pow(sigma / r, 12);
+                            const term2 = Math.pow(sigma / r, 6);
+                            return 4 * epsilon * (term1 - term2);
+                        }
+
+                        function updateChart() {
+                            const epsilon = parseFloat(epsilonInput.value);
+                            const sigma = parseFloat(sigmaInput.value);
+                            epsilonValue.textContent = epsilon.toFixed(2);
+                            sigmaValue.textContent = sigma.toFixed(2);
+
+                            const data = [];
+                            const labels = [];
+                            for (let r = 0.8; r <= 3; r += 0.05) {
+                                labels.push(r.toFixed(2));
+                                data.push(calculatePotential(r, epsilon, sigma));
+                            }
+
+                            chart.data.labels = labels;
+                            chart.data.datasets[0].data = data;
+                            chart.update();
+                        }
+
+                        epsilonInput.addEventListener('input', updateChart);
+                        sigmaInput.addEventListener('input', updateChart);
+                        updateChart();
+                    });
+                </script>
+            </section>
+
+            <section data-background-image="graphics/dark_0.300000.png" data-background-opacity=1.0
+                data-background-size="110%">
+
+
+
+                <h5>
+                    <font color="#c5ad73"> [simulering]</font>
+                </h5>
+            </section>
+
+
+
+
+            <section data-background-image="graphics/dark_0.900000.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <p class="fragment">
+                    <font color="#c5ad73">Hvordan forklarer vi slike krefter</font>
+                </p>
+                <p class="fragment">
+                    <font color="#ffffcc">fra grunnprinsipper?</font>
+                </p>
+                <p class="fragment">
+                    <font color="#ffffcc">$\rightarrow$ "Ab initio kvantekjemi"</font>
+                </p>
+
+
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_4.png" data-background-opacity=1.0
+                data-background-size="110%">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/hyCc22w4p0c?si=DgRAPLOxefE3_Fzy"
+                    title="YouTube video player" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                <p></p>
+                <font color="#ffffcc" size="5">"Now we all of us know that it does not work
+                    very well just to do one's job. In order to
+                    gain fame it may be as important to make
+                    some noise about what you are doing, and in
+                    this respect the Mercedes Euclid helped me
+                    quite excellently. Even Herr Wachtmeister
+                    honoured me with respect and left me alone in
+                    the late afternoons." -- Egil Hylleraas</font>
+                </font>
+
+            </section>
+
+            <section data-background-image="graphics/dark_0.700000.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <img src="graphics/elm_0.png" width="30%">
+                <h5>
+                    <font color="#c5ad73">Heliums grunntilstandsenergi</font>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/backdrop_general_3.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <font color="#ffffff">
+                    $(-\frac{\hbar^2}{2m}\frac{\partial^2 }{\partial x^2} + V(x) ) \Psi = E \Psi$
+                </font>
+                <p>&nbsp;</p>
+                <font color="#c5ad73">Hva er $V(x)$ for elektronene i Helium? </font>
+            </section>
+
+            <section data-background-image="graphics/backdrop_general_3.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <font color="#ffffff">
+                    $-\frac{\hbar^2}{2m_e}\left(\nabla_1^2 + \nabla_2^2\right)\Psi -
+                    \frac{2e^2}{4\pi\epsilon_0}\left(\frac{1}{r_1} + \frac{1}{r_2}\right)\Psi +
+                    \frac{e^2}{4\pi\epsilon_0}\frac{1}{r_{12}}\Psi = E\Psi
+                    $
+                </font>
+                <p>&nbsp;</p>
+                <font color="#c5ad73">Den molekylære (tidsuavhengige) Schrødingerlikningen </font>
+                <p></p>
+                <font color="#c5ad73" size="5">(Uten relativistiske effekter, med kjernen fiksert, i vakuum og ingen
+                    eksterne
+                    felter.)</font>
+            </section>
+
+            <section data-background-image="graphics/backdrop_general_3.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <font color="#ffffff">
+                    $\Psi := \Psi(x_1, x_2), \quad x_n = (\mathbf{x}_n, \sigma_n)$
+                </font>
+                <p>&nbsp;</p>
+                <font color="#c5ad73">Bølgefunksjonen beskriver nå to elektroner med romlig posisjon og spinn.</font>
+            </section>
+
+            <section data-background-image="graphics/dark_0.200000.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <font color="#ffffff">
+                    $E(\Psi_t) = \frac{\langle \Psi_t | \hat{H} | \Psi_t \rangle }{\langle \Psi_t | \Psi_t \rangle}
+                    \geq E_0,$
+                </font>
+                <p></p>
+                <font color="#c5ad73">Variasjonsprinsippet: den forventede energien for enhver normalisert $\Psi_t$ vil
+                    alltid være større eller lik den eksakte grunntilstandsenergien.</font>
+            </section>
+
+
+            <section data-background-image="graphics/backdrop_general_3.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <font color="#c5ad73">Hvordan velger vi formen på </font>
+
+                <font color="#ffffff">
+                    $\Psi_t = \Psi_t(x_1, x_2)$
+                </font>
+                <font color="#c5ad73">? </font>
+
+
+
+            </section>
+
+            <section data-background-image="graphics/backdrop_general_3.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <font color="#ffffff">
+                    $\Psi_t = \Psi_t(x_1, x_2)$ må
+                </font>
+                <p></p>
+                <font color="#c5ad73">
+                    <ul>
+                        <li>
+                            inneholde riktig antall elektroner
+                        </li>
+                        <li>
+                            Være normaliserbar <font color="#ffffff">$\int \Psi_t^2 dx_1 dx_2 = 1$</font>
+                        </li>
+                        <li>
+                            være antisymmetrisk: <font color="#ffffff">
+                                $\Psi_t(x_1, x_2)$ = - $\Psi_t(x_2, x_1)$
+                            </font>
+                        </li>
+                        <li>
+                            oppføre seg fysisk fornuftig når systemet fragmenteres (<font color="#ffffff">$E_{12}
+                                \rightarrow E_1
+                                + E_2$</font> når <font color="#ffffff">$r_{12} \to
+                                \infty$</font>)
+                        </li>
+                    </ul>
+                </font>
+            </section>
+
+            <section data-background-image="graphics/backdrop_general_3.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <h5>
+                    <font color="#c5ad73">Enpartikkelmodellen </font>
+                </h5>
+                <font color="#c5ad73">En fysisk fornuftig form med riktig antall elektroner: </font>
+                <p></p>
+                <font color="#ffffff">
+                    $\Psi_t(x_1, x_2) = \psi_1(x_1)\psi_2(x_2)$
+                </font>
+                <p></p>
+                <font color="#c5ad73">... men er den antisymmetrisk? </font>
+
+
+
+            </section>
+
+            <section data-background-image="graphics/backdrop_general_3.png" data-background-opacity=1.0
+                data-background-size="120%">
+                <font color="#c5ad73">En antisymmetrisk form: <font color="#ffffff">Slater-determinanten</font>
+                </font>
+                <p></p>
+                <font color="#ffffff">
+                    $ \frac{1}{\sqrt{2}} ( \psi_1(x_1)\psi_2(x_2) - \psi_1(x_2)\psi_2(x_1))$
+                </font>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_4.png" style="text-align:center; color:#f9ffd0">
+                <p>En basisfunksjon</p>
+                <img src="graphics/basis_function.png" width=70% align="center">
+                <p>$\vert \phi \rangle $</p>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_5.png" style="text-align:center; color:#f9ffd0">
+                <p>En basis</p>
+                <img src="graphics/basis_2.png" width=70%>
+                <p>$\{ \vert \phi \rangle \} $</p>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_4.png" style="text-align:center; color:#f9ffd0">
+                <p>En annen basisfunksjon </p>
+                <img src="graphics/basis_other.png" width=70%>
+                <p>$\vert \chi \rangle $</p>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_4.png" style="text-align:center; color:#f9ffd0">
+                <p>En annen basis </p>
+                <img src="graphics/basis_set_other.png" width=70%>
+                <p>$\{ \vert \chi \rangle \} $</p>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_14.png" style="text-align:center; color:#2b2e4a">
+                <p>Lokale og utstrakte basisfunksjoner</p>
+                <img src="graphics/basis_sidebyside.png" width=100%>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_12.png" style="text-align:center; color:#2b2e4a">
+                <p>Basisekspansjoner (i)</p>
+                <img src="graphics/basis_sum_1.png" width=70%>
+                <p>$\vert \psi \rangle = \sum_i \vert \phi_i \rangle c_i$</p>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_13.png" style="text-align:center; color:#2b2e4a">
+                <p>Basisekspansjoner (ii)</p>
+                <img src="graphics/basis_sum_2.png" width=70%>
+                <p>$\vert \psi \rangle = \sum_i \vert \phi_i \rangle c_i$</p>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_14.png" style="text-align:center; color:#2b2e4a">
+                <p>Basisekspansjoner (iii)</p>
+                <img src="graphics/basis_sum_3.png" width=70%>
+                <p>$\vert \psi \rangle = \sum_i \vert \phi_i \rangle c_i$</p>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_14.png" style="text-align:center; color:#2b2e4a">
+                <p>Basisekspansjoner (iv)</p>
+                <img src="graphics/basis_ekspansjon_5.png" width=70%>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_14.png" style="text-align:center; color:#2b2e4a">
+                <p>Basisekspansjoner (v)</p>
+                <img src="graphics/basis_ekspansjon_4.png" width=70%>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_14.png" style="text-align:center; color:#2b2e4a">
+                <p>Basisekspansjoner (vi)</p>
+                <img src="graphics/basis_ekspansjon_7.png" width=70%>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_14.png" style="text-align:center; color:#2b2e4a">
+                <p>Koeffisientene i en <a href="https://en.wikipedia.org/wiki/Orthonormality">ortonormal</a> basis
+                    kan finnes fra et integral</p>
+                <p>$c_i = \langle \phi_i \vert \psi \rangle = \int_\Omega \phi_i(\mathbf{x}) \psi(\mathbf{x})
+                    d\mathbf{x}$</p>
+            </section>
+
+            <section data-background-image="graphics/dark_0.300000.png" data-background-opacity=1.0
+                data-background-size="110%">
+
+
+
+                <h5>
+                    <font color="#c5ad73"> [simulering]</font>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/graded_background_2.png" data-background-opacity=1.0
+                data-background-size="120%">
+
+                <h5>
+                    <font color="#FFFFBB">Kvantekjemi krever mye regnekraft</font>
+                </h5>
+            </section>
+
+
+
+            <section data-background-color="#002222">
+                <img src="graphics/multiparticle.png" width=500px>
+                <p></p>
+                <font color="#008888"> Et regnskap for </font>
+                <font color="#22FFBB">vekselvirkninger</font>
+            </section>
+
+            <section data-background-image="graphics/ccsdt.png" data-background-opacity=1.0 data-background-size="120%">
+                <h5>
+                    <font color="#000022">Mange summasjoner og symmetrier.</font>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/dark_0.300000.png" data-background-opacity=1.0
+                data-background-size="110%">
+
+
+
+                <h5>
+                    <font color="#c5ad73"> [simulering, PySCF]</font>
+                </h5>
+            </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <section data-background-iframe="H2O_orbital.html">
+                <img data-src="graphics/mock_orbital.png" height='100px' align='left'>
+                <font color="#22FFBB">Takk for i dag!</font>
+            </section>
+
+
+
+
+
+
+
+        </div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/math/math.js"></script>
+    <script>
+        // More info about initialization & config:
+        // - https://revealjs.com/initialization/
+        // - https://revealjs.com/config/
+        Reveal.initialize({
+            hash: true,
+
+            // Learn about plugins: https://revealjs.com/plugins/
+            plugins: [RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX]
+        });
+    </script>
+</body>
+
+</html>
