@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGPU WaveCam - Interactive Wave Equation Solver</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        #start-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+            background: rgba(8, 12, 18, 0.94);
+            text-align: center;
+        }
+
+        #start-overlay[hidden] {
+            display: none;
+        }
+
+        #start-overlay h2 {
+            margin: 0 0 12px;
+            color: #4fc3f7;
+            font-size: 2em;
+        }
+
+        #start-overlay p {
+            max-width: 36em;
+            margin: 0 auto 20px;
+            color: #ddd;
+            line-height: 1.45;
+        }
+
+        #start-camera {
+            font: inherit;
+            font-size: 1.1em;
+            padding: 12px 28px;
+            border: 0;
+            border-radius: 8px;
+            background: #4fc3f7;
+            color: #041018;
+            cursor: pointer;
+        }
+
+        #start-camera:disabled {
+            cursor: wait;
+            opacity: 0.7;
+        }
+
+        #start-overlay a {
+            color: #c5ad73;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            border-bottom: 2px solid #333;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #4fc3f7;
+            font-size: 2.5em;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.3);
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            color: #aaa;
+            font-size: 1.1em;
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 120px);
+        }
+
+        .canvas-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: #111;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            border: 3px solid #333;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(79, 195, 247, 0.2);
+            background: #000;
+        }
+
+        #simulation-canvas {
+            display: block;
+            border-radius: 8px;
+        }
+
+        .canvas-info {
+            margin-top: 15px;
+            text-align: center;
+            color: #ccc;
+            font-size: 0.9em;
+        }
+
+        .controls-sidebar {
+            width: 350px;
+            background: #1a1a1a;
+            border-left: 2px solid #333;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .controls-sidebar.collapsed {
+            transform: translateX(350px);
+        }
+
+        .controls-toggle {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: #4fc3f7;
+            border: none;
+            color: white;
+            padding: 15px 10px;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls-toggle:hover {
+            background: #29b6f6;
+            transform: translateY(-50%) translateX(-5px);
+        }
+
+        .controls-sidebar.collapsed+.controls-toggle {
+            transform: translateY(-50%) translateX(-350px);
+        }
+
+        .controls-content {
+            padding: 12px;
+        }
+
+        .control-section {
+            margin-bottom: 12px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background: #222;
+        }
+
+        .section-header {
+            padding: 8px 10px;
+            background: #333;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background 0.2s ease;
+        }
+
+        .section-header:hover {
+            background: #444;
+        }
+
+        .section-header h3 {
+            margin: 0;
+            color: #4fc3f7;
+            font-size: 0.95em;
+            flex: 1;
+        }
+
+        .section-toggle {
+            color: #aaa;
+            font-size: 1em;
+            transition: transform 0.2s ease;
+        }
+
+        .section-content {
+            padding: 10px;
+            display: block;
+        }
+
+        .section-content.collapsed {
+            display: none;
+        }
+
+        .control-group {
+            margin-bottom: 8px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 3px;
+            color: #ccc;
+            font-size: 0.8em;
+            line-height: 1.2;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 2px;
+            accent-color: #4fc3f7;
+            height: 20px;
+        }
+
+        select,
+        button {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 3px;
+            background: #4fc3f7;
+            color: white;
+            cursor: pointer;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.8em;
+            transition: background 0.2s ease;
+        }
+
+        button:hover,
+        select:hover {
+            background: #29b6f6;
+        }
+
+        button.active {
+            background: #2e7d32;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 5px;
+            accent-color: #4fc3f7;
+        }
+
+        .small-text {
+            font-size: 0.7em;
+            color: #888;
+            margin-top: 2px;
+            line-height: 1.2;
+        }
+
+        input[type="text"] {
+            padding: 5px 8px;
+            font-size: 0.8em;
+        }
+
+        .error {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #d32f2f;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            z-index: 1001;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            font-size: 0.85em;
+        }
+
+        .webcam-preview {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            z-index: 999;
+        }
+
+        .shader-editor {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            color: #fff;
+            width: 100%;
+            min-height: 150px;
+            resize: vertical;
+            font-size: 12px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .controls-sidebar {
+                width: 100%;
+                height: 50vh;
+                transform: translateY(100%);
+                border-left: none;
+                border-top: 2px solid #333;
+            }
+
+            .controls-sidebar.collapsed {
+                transform: translateY(0);
+            }
+
+            .controls-toggle {
+                right: 50%;
+                top: auto;
+                bottom: 20px;
+                transform: translateX(50%);
+                border-radius: 8px 8px 0 0;
+                padding: 10px 15px;
+            }
+
+            .canvas-section {
+                height: 50vh;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="start-overlay">
+        <div>
+            <h2>Bølgeligningen med kamera</h2>
+            <p>Det du holder foran kameraet blir en hindring bølgen må gå rundt. Nettleseren spør om kameraet når du starter. Simuleringen krever WebGPU, som finnes i Chrome og Edge.</p>
+            <button id="start-camera" type="button">Start kamera</button>
+            <p style="margin-top: 18px;"><a href="index.html" target="_blank" rel="noopener">Åpne i eget vindu</a></p>
+        </div>
+    </div>
+    <div class="error" id="error-message"></div>
+
+    <div class="header">
+        <h1 style="font-size: 1.8em; margin: 12px 0;">WaveCam v.2</h1>
+    </div>
+
+    <div class="main-container">
+        <div class="canvas-section">
+            <div class="canvas-wrapper">
+                <canvas id="simulation-canvas" width="640" height="480"></canvas>
+            </div>
+            <div class="canvas-info">
+                <span id="resolution-info" style="font-size: 0.85em;">Resolution: 640×480</span> •
+                <span id="fps-info" style="font-size: 0.85em;">FPS: --</span> •
+                <span id="equation-info" style="font-size: 0.85em;">Wave Equation</span>
+            </div>
+        </div>
+
+        <div class="controls-sidebar" id="controls-sidebar">
+            <div class="controls-content">
+                <!-- Preset Management -->
+                <div class="control-section">
+                    <div class="section-header" onclick="toggleSection('presets')">
+                        <span class="section-toggle" id="presets-toggle">▼</span>
+                    </div>
+                    <div class="section-content" id="presets-content">
+                        <div class="control-group">
+                            <label for="preset-name">Preset Name:</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="preset-name" placeholder="Enter preset name..."
+                                    style="flex: 1; padding: 5px 8px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 3px; font-size: 0.8em;">
+                                <button id="save-preset-btn"
+                                    style="padding: 5px 10px; background: #2d5a7b; border: none; color: white; cursor: pointer; border-radius: 3px; white-space: nowrap; font-size: 0.8em;">
+                                    💾 Save
+                                </button>
+                            </div>
+                        </div>
+                        <div id="preset-list" style="margin-top: 8px;">
+                            <p class="small-text" style="color: #888; padding: 6px;">No presets saved yet</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resolution & Performance -->
+                <div class="control-section">
+                    <div class="section-header" onclick="toggleSection('resolution')">
+                        <h3>📐 Resolution & Performance</h3>
+                        <span class="section-toggle" id="resolution-toggle">▼</span>
+                    </div>
+                    <div class="section-content" id="resolution-content">
+                        <div class="control-group">
+                            <select id="resolution">
+                                <option value="320x240">320×240 (Fast)</option>
+                                <option value="640x480" selected>640×480 (Balanced)</option>
+                                <option value="800x600">800×600 (High)</option>
+                                <option value="1024x768">1024×768 (Ultra)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="steps-per-frame">Steps per Frame: <span
+                                    id="steps-per-frame-value">3</span></label>
+                            <input type="range" id="steps-per-frame" min="1" max="10" step="1" value="3">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Equation Type -->
+                <div class="control-section">
+                    <div class="section-header" onclick="toggleSection('equation')">
+                        <h3>🧮 Equation Type</h3>
+                        <span class="section-toggle" id="equation-toggle">▼</span>
+                    </div>
+                    <div class="section-content" id="equation-content">
+                        <div class="control-group">
+                            <select id="equation-type">
+                                <option value="wave">Wave Equation (Hard Boundaries)</option>
+                                <option value="wave-bathymetry">Wave Equation (Depth-Based Speed)</option>
+                                <option value="wave-motion">Wave Equation (Motion-Driven)</option>
+                                <option value="schrodinger">Schrödinger Equation</option>
+                                <option value="cloth-drapery">Cloth Drapery (2D Fabric Physics)</option>
+                                <option value="lattice-boltzmann">Lattice Boltzmann Fluid (Motion-Driven)</option>
+                                <option value="navier-stokes-fluid">Navier-Stokes Fluid (Webcam Interactive)</option>
+                                <option value="source-debug">Source Debug (shows source only)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <button id="reset-simulation">🔄 Reset</button>
+                            <button id="toggle-source">🎯 Toggle Source</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wave Physics -->
+                <div class="control-section">
+                    <div class="section-header" onclick="toggleSection('physics')">
+                        <h3>🌊 Wave Physics</h3>
+                        <span class="section-toggle" id="physics-toggle">▼</span>
+                    </div>
+                    <div class="section-content" id="physics-content">
+                        <div class="control-group">
+                            <label for="wave-speed">Wave Speed: <span id="wave-speed-value">2.0</span></label>
+                            <input type="range" id="wave-speed" min="0.1" max="10.0" step="0.1" value="2.0">
+                        </div>
+                        <div class="control-group">
+                            <label for="damping">Damping: <span id="damping-value">0.0</span></label>
+                            <input type="range" id="damping" min="0" max="0.1" step="0.001" value="0.0">
+                        </div>
+                        <div class="control-group">
+                            <label for="wave-amplitude">Wave Amplitude: <span
+                                    id="wave-amplitude-value">10.0</span></label>
+                            <input type="range" id="wave-amplitude" min="0.1" max="100.0" step="0.5" value="10.0">
+                            <div class="small-text">Brightness scale for visualization</div>
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                <input type="checkbox" id="normalize-waves" checked> Normalize Waves
+                            </label>
+                            <div class="small-text">Keep wave values within bounds</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="wave-range">Wave Range: <span id="wave-range-value">1.0</span></label>
+                            <input type="range" id="wave-range" min="0.1" max="5.0" step="0.1" value="1.0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Source & Boundaries -->
+                <div class="control-section">
+                    <div class="section-header" onclick="toggleSection('source')">
+                        <h3>🎯 Source & Boundaries</h3>
+                        <span class="section-toggle" id="source-toggle">▼</span>
+                    </div>
+                    <div class="section-content" id="source-content">
+                        <div class="control-group">
+                            <label for="source-frequency">Source Frequency: <span id="source-frequency-value">0.1</span>
+                                Hz</label>
+                            <input type="range" id="source-frequency" min="0.05" max="5.0" step="0.05" value="0.1">
+                        </div>
+                        <div class="control-group">
+                            <label for="source-strength">Source Strength: <span
+                                    id="source-strength-value">2.0</span></label>
+                            <input type="range" id="source-strength" min="0.1" max="10.0" step="0.1" value="2.0">
+                        </div>
+                        <div class="control-group">
+                            <label for="source-size">Source Size: <span id="source-size-value">5.0</span></label>
+                            <input type="range" id="source-size" min="2.0" max="100.0" step="1.0" value="5.0">
+                        </div>
+                        <div class="control-group">
+                            <label for="boundary-threshold">Boundary Threshold: <span
+                                    id="boundary-threshold-value">0.25</span></label>
+                            <input type="range" id="boundary-threshold" min="0.05" max="0.95" step="0.05" value="0.25">
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                <input type="checkbox" id="invert-boundaries"> Invert Boundaries
+                            </label>
+                            <div class="small-text">When checked: bright areas become boundaries instead of dark areas
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cloth Physics -->
+                <div class="control-section">
+                    <div class="section-header" onclick="toggleSection('cloth')">
+                        <h3>🧵 Cloth Physics</h3>
+                        <span class="section-toggle" id="cloth-toggle">▼</span>
+                    </div>
+                    <div class="section-content collapsed" id="cloth-content">
+                        <div class="control-group">
+                            <label for="cloth-gravity">Cloth Gravity: <span id="cloth-gravity-value">0.5</span></label>
+                            <input type="range" id="cloth-gravity" min="0.0" max="2.0" value="0.5" step="0.1">
+                        </div>
+                        <div class="control-group">
+                            <label for="cloth-stiffness">Spring Stiffness: <span
+                                    id="cloth-stiffness-value">0.8</span></label>
+                            <input type="range" id="cloth-stiffness" min="0.1" max="2.0" value="0.8" step="0.1">
+                        </div>
+                        <div class="control-group">
+                            <label for="cloth-damping">Cloth Damping: <span id="cloth-damping-value">0.95</span></label>
+                            <input type="range" id="cloth-damping" min="0.8" max="0.99" value="0.95" step="0.01">
+                        </div>
+                        <div class="control-group">
+                            <label for="motion-sensitivity">Motion Sensitivity / Gamma: <span
+                                    id="motion-sensitivity-value">2.0</span></label>
+                            <input type="range" id="motion-sensitivity" min="0.1" max="5.0" value="2.0" step="0.05">
+                            <div class="small-text">Cloth: motion force | Schrödinger: contrast (0.3-1.0 recommended)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Schrödinger Quantum Physics -->
+                <div class="control-section">
+                    <div class="section-header" onclick="toggleSection('schrodinger')">
+                        <h3>⚛️ Schrödinger Quantum</h3>
+                        <span class="section-toggle" id="schrodinger-toggle">▼</span>
+                    </div>
+                    <div class="section-content collapsed" id="schrodinger-content">
+                        <div class="control-group">
+                            <label for="schrodinger-display-mode">Visualization Mode:</label>
+                            <select id="schrodinger-display-mode">
+                                <option value="0">Real Part ψ_R (Scalar)</option>
+                                <option value="1">Probability |ψ|² (Scalar)</option>
+                                <option value="2">Phase-Weighted (Scalar)</option>
+                                <option value="3">Real + Imaginary (Color)</option>
+                                <option value="4">Imaginary ψ_I (Debug)</option>
+                            </select>
+                            <div class="small-text" id="schrodinger-mode-hint">Scalar modes use Color Scheme below</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="schrodinger-prob-scale">Probability Scale: <span
+                                    id="schrodinger-prob-scale-value">500</span></label>
+                            <input type="range" id="schrodinger-prob-scale" min="1" max="5000" value="500" step="1">
+                            <div class="small-text">Scale for probability glow (higher = brighter)</div>
+                        </div>
+                        <p class="small-text" style="margin: 6px 0; color: #999;">
+                            💡 Use "Wave Amplitude" and "Motion Sensitivity" sliders above to adjust brightness and
+                            contrast
+                        </p>
+                        <hr style="border-color: #444; margin: 6px 0;">
+                        <p class="small-text" style="margin-bottom: 5px; color: #aaa;">⚙️ Simulation Parameters (Reset
+                            to apply)</p>
+                        <div class="control-group">
+                            <label for="cloth-gravity">Potential Amplitude: <span
+                                    id="cloth-gravity-value">0.5</span></label>
+                            <input type="range" id="cloth-gravity" min="0.0" max="10.0" value="0.5" step="0.1">
+                            <div class="small-text">Multiplier for V(x,y): amplitude × (V - offset)</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="schrodinger-v-offset">Potential Offset: <span
+                                    id="schrodinger-v-offset-value">0.0</span></label>
+                            <input type="range" id="schrodinger-v-offset" min="-1.0" max="1.0" value="0.0" step="0.05">
+                            <div class="small-text">Baseline potential shift (negative = attractive)</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="schrodinger-sigma">Initial Width (σ): <span
+                                    id="schrodinger-sigma-value">30</span></label>
+                            <input type="range" id="schrodinger-sigma" min="5" max="100" value="30" step="1">
+                            <div class="small-text">Gaussian width (smaller = more localized)</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="schrodinger-kx">Initial kₓ: <span id="schrodinger-kx-value">0.8</span></label>
+                            <input type="range" id="schrodinger-kx" min="-3.0" max="3.0" value="0.8" step="0.1">
+                            <div class="small-text">X-momentum (wavenumber)</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="schrodinger-ky">Initial kᵧ: <span id="schrodinger-ky-value">0.0</span></label>
+                            <input type="range" id="schrodinger-ky" min="-3.0" max="3.0" value="0.0" step="0.1">
+                            <div class="small-text">Y-momentum (wavenumber)</div>
+                        </div>
+                        <div class="control-group" style="margin-top: 5px;">
+                            <button id="reset-schrodinger"
+                                style="width: 100%; padding: 5px; background: #2d5a7b; border: none; color: white; cursor: pointer; border-radius: 3px; font-size: 0.8em;">
+                                🔄 Reset Wavefunction
+                            </button>
+                        </div>
+                        <p class="small-text" style="margin-top: 6px; color: #4fc3f7;" id="schrodinger-legend">
+                            <strong>Real Part ψ_R</strong><br>
+                            • Use Red-Blue colormap<br>
+                            • Positive (red) / Negative (blue)<br>
+                            <span style="color: #aaa;">Color oscillations = local wavelength λ</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Lattice Boltzmann Physics -->
+                <div class="control-section">
+                    <div class="section-header" onclick="toggleSection('lbm')">
+                        <h3>💧 Lattice Boltzmann Fluid</h3>
+                        <span class="section-toggle" id="lbm-toggle">▼</span>
+                    </div>
+                    <div class="section-content collapsed" id="lbm-content">
+                        <div class="control-group">
+                            <label for="fluid-viscosity">Fluid Viscosity: <span
+                                    id="fluid-viscosity-value">0.1</span></label>
+                            <input type="range" id="fluid-viscosity" min="0.01" max="0.5" value="0.1" step="0.01">
+                            <div class="small-text">Higher = thicker fluid, lower = more turbulent</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="flow-velocity">Flow Velocity: <span id="flow-velocity-value">0.05</span></label>
+                            <input type="range" id="flow-velocity" min="0.0" max="0.2" value="0.05" step="0.01">
+                            <div class="small-text">Base fluid flow speed</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="motion-force">Motion Force: <span id="motion-force-value">5.0</span></label>
+                            <input type="range" id="motion-force" min="0.1" max="20.0" value="5.0" step="0.1">
+                            <div class="small-text">How strongly motion affects fluid</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="density-display">Density Display: <span
+                                    id="density-display-value">1.0</span></label>
+                            <input type="range" id="density-display" min="0.1" max="3.0" value="1.0" step="0.1">
+                            <div class="small-text">Density visualization intensity</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navier-Stokes Fluid Physics -->
+                <div class="control-section">
+                    <div class="section-header" onclick="toggleSection('navier-stokes')">
+                        <h3>🌊 Navier-Stokes Fluid</h3>
+                        <span class="section-toggle" id="navier-stokes-toggle">▼</span>
+                    </div>
+                    <div class="section-content collapsed" id="navier-stokes-content">
+                        <div class="control-group">
+                            <label for="ns-fluid-viscosity">Fluid Viscosity: <span
+                                    id="ns-fluid-viscosity-value">0.1</span></label>
+                            <input type="range" id="ns-fluid-viscosity" min="0.001" max="2.0" value="0.1" step="0.001">
+                            <div class="small-text">Controls fluid thickness - higher = more viscous</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="ns-flow-velocity">Base Flow: <span
+                                    id="ns-flow-velocity-value">0.05</span></label>
+                            <input type="range" id="ns-flow-velocity" min="0.0" max="1.0" value="0.05" step="0.01">
+                            <div class="small-text">Continuous fluid flow velocity</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="ns-density-display">Dye Intensity: <span
+                                    id="ns-density-display-value">1.0</span></label>
+                            <input type="range" id="ns-density-display" min="0.0" max="20.0" value="1.0" step="0.1">
+                            <div class="small-text">Fluid dye visualization brightness</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="ns-velocity-damping">Velocity Damping: <span
+                                    id="ns-velocity-damping-value">0.0</span></label>
+                            <input type="range" id="ns-velocity-damping" min="0.0" max="0.5" value="0.0" step="0.001">
+                            <div class="small-text">How quickly fluid motion dissipates</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="ns-density-damping">Dye Dissipation: <span
+                                    id="ns-density-damping-value">0.95</span></label>
+                            <input type="range" id="ns-density-damping" min="0.5" max="1.0" value="0.95" step="0.001">
+                            <div class="small-text">How quickly dye fades away</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="ns-flow-direction">Flow Direction: <span
+                                    id="ns-flow-direction-value">0°</span></label>
+                            <input type="range" id="ns-flow-direction" min="0" max="360" value="0" step="1">
+                            <div class="small-text">Direction of base fluid flow (0° = right, 90° = down)</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="ns-flow-strength">Flow Strength: <span
+                                    id="ns-flow-strength-value">0.00</span></label>
+                            <input type="range" id="ns-flow-strength" min="0.0" max="2.0" value="0.0" step="0.01">
+                            <div class="small-text">Strength of the directional flow</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="ns-motion-force">Motion Force: <span
+                                    id="ns-motion-force-value">1.0</span></label>
+                            <input type="range" id="ns-motion-force" min="0.1" max="20.0" value="1.0" step="0.1">
+                            <div class="small-text">How strongly motion affects fluid</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Settings -->
+                <div class="control-section">
+                    <div class="section-header" onclick="toggleSection('visual')">
+                        <h3>🎨 Visual Settings</h3>
+                        <span class="section-toggle" id="visual-toggle">▼</span>
+                    </div>
+                    <div class="section-content collapsed" id="visual-content">
+                        <div class="control-group">
+                            <label for="mix-ratio">Wave/Webcam Mix: <span id="mix-ratio-value">0.7</span></label>
+                            <input type="range" id="mix-ratio" min="0.0" max="1.0" step="0.05" value="0.7">
+                            <div class="small-text">0.0 = pure webcam, 1.0 = pure waves</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="color-scheme">Color Scheme:</label>
+                            <select id="color-scheme">
+                                <optgroup label="Classic">
+                                    <option value="red-blue">Red-Blue (Classic)</option>
+                                    <option value="grayscale">Grayscale (Black-White)</option>
+                                </optgroup>
+                                <optgroup label="Scientific">
+                                    <option value="viridis">Viridis (Purple-Blue-Green-Yellow)</option>
+                                    <option value="plasma">Plasma (Purple-Pink-Yellow)</option>
+                                    <option value="inferno">Inferno (Black-Purple-Yellow)</option>
+                                    <option value="magma">Magma (Black-Purple-White)</option>
+                                    <option value="cividis">Cividis (Blue-Yellow, Colorblind-Safe)</option>
+                                    <option value="turbo">Turbo (Blue-Cyan-Yellow-Red)</option>
+                                </optgroup>
+                                <optgroup label="Natural">
+                                    <option value="fire">Fire (Yellow-Red-Black)</option>
+                                    <option value="ocean">Ocean (Cyan-Blue-Navy)</option>
+                                    <option value="earth">Earth (Brown-Green-Blue)</option>
+                                    <option value="sunset">Sunset (Purple-Orange-Yellow)</option>
+                                    <option value="forest">Forest (Dark-Light Green)</option>
+                                    <option value="ice">Ice (White-Cyan-Blue)</option>
+                                </optgroup>
+                                <optgroup label="Artistic">
+                                    <option value="rainbow">Rainbow (Full Spectrum)</option>
+                                    <option value="neon">Neon (Bright Electric Colors)</option>
+                                    <option value="pastel">Pastel (Soft Colors)</option>
+                                    <option value="cyberpunk">Cyberpunk (Pink-Cyan-Purple)</option>
+                                    <option value="vintage">Vintage (Sepia-Orange-Brown)</option>
+                                    <option value="aurora">Aurora (Green-Purple-Blue)</option>
+                                </optgroup>
+                                <optgroup label="Thermal">
+                                    <option value="thermal">Thermal (Purple-Red-Yellow)</option>
+                                    <option value="hot">Hot (Black-Red-Yellow-White)</option>
+                                    <option value="cool">Cool (Cyan-Blue-Magenta)</option>
+                                    <option value="copper">Copper (Black-Orange-Yellow)</option>
+                                </optgroup>
+                                <optgroup label="Diverging">
+                                    <option value="spectral">Spectral (Red-Yellow-Blue)</option>
+                                    <option value="coolwarm">Cool-Warm (Blue-White-Red)</option>
+                                    <option value="seismic">Seismic (Blue-White-Red)</option>
+                                    <option value="balance">Balance (Blue-Gray-Orange)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="blend-mode">Blending Mode:</label>
+                            <select id="blend-mode">
+                                <option value="normal">Normal (Alpha Blend)</option>
+                                <option value="add">Add (Additive)</option>
+                                <option value="subtract">Subtract</option>
+                                <option value="multiply">Multiply</option>
+                                <option value="screen">Screen</option>
+                                <option value="overlay">Overlay</option>
+                                <option value="difference">Difference</option>
+                                <option value="exclusion">Exclusion</option>
+                                <option value="convoluted">Convoluted (FFT)</option>
+                            </select>
+                            <div class="small-text">How wave data combines with webcam image</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="color-scale-min">Color Scale Min: <span
+                                    id="color-scale-min-value">-5.0</span></label>
+                            <input type="range" id="color-scale-min" min="-10.0" max="10.0" step="0.1" value="-5.0">
+                            <div class="small-text">Minimum value for color mapping</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="color-scale-max">Color Scale Max: <span
+                                    id="color-scale-max-value">5.0</span></label>
+                            <input type="range" id="color-scale-max" min="-10.0" max="10.0" step="0.1" value="5.0">
+                            <div class="small-text">Maximum value for color mapping</div>
+                        </div>
+                        <div class="control-group">
+                            <button id="auto-scale-colors">🎯 Auto-Scale Colors</button>
+                            <div class="small-text">Automatically set min/max based on current data range</div>
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                <input type="checkbox" id="mirror-webcam"> Mirror Webcam
+                            </label>
+                            <div class="small-text">Horizontally flip the webcam input</div>
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                <input type="checkbox" id="enable-normal-mapping"> Surface Normal Shading
+                            </label>
+                            <div class="small-text">Treat simulation as 3D surface with lighting</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="normal-strength">Normal Strength: <span
+                                    id="normal-strength-value">1.0</span></label>
+                            <input type="range" id="normal-strength" min="0.1" max="5.0" step="0.1" value="1.0">
+                            <div class="small-text">How pronounced the 3D surface effect is</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="light-direction">Light Direction: <span
+                                    id="light-direction-value">45°</span></label>
+                            <input type="range" id="light-direction" min="0" max="360" step="5" value="45">
+                            <div class="small-text">Direction of the virtual light source</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="light-elevation">Light Elevation: <span
+                                    id="light-elevation-value">30°</span></label>
+                            <input type="range" id="light-elevation" min="0" max="90" step="5" value="30">
+                            <div class="small-text">Height angle of the virtual light source</div>
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                <input type="checkbox" id="enable-chromatic-aberration"> 80s Chromatic Aberration
+                            </label>
+                            <div class="small-text">Classic color separation effect</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="aberration-strength">Aberration Strength: <span
+                                    id="aberration-strength-value">2.0</span></label>
+                            <input type="range" id="aberration-strength" min="0.0" max="10.0" step="0.1" value="2.0">
+                            <div class="small-text">How much the color channels separate</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="aberration-offset">Aberration Offset: <span
+                                    id="aberration-offset-value">0.5</span></label>
+                            <input type="range" id="aberration-offset" min="0.0" max="2.0" step="0.05" value="0.5">
+                            <div class="small-text">Base separation distance (in pixels)</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="aberration-angle">Aberration Angle: <span
+                                    id="aberration-angle-value">0°</span></label>
+                            <input type="range" id="aberration-angle" min="0" max="360" step="5" value="0">
+                            <div class="small-text">Direction of color separation</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced -->
+                <div class="control-section">
+                    <div class="section-header" onclick="toggleSection('advanced')">
+                        <h3>⚙️ Advanced</h3>
+                        <span class="section-toggle" id="advanced-toggle">▼</span>
+                    </div>
+                    <div class="section-content collapsed" id="advanced-content">
+                        <div class="control-group">
+                            <button id="debug-mode">🔍 Debug Mode: OFF</button>
+                        </div>
+                        <div class="control-group">
+                            <h4 style="color: #4fc3f7; margin-bottom: 10px;">Custom Shader</h4>
+                            <textarea id="shader-editor" class="shader-editor"
+                                placeholder="Custom WGSL compute shader code..."></textarea>
+                            <button id="compile-shader">Compile Shader</button>
+                            <button id="load-default">Load Default</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="controls-toggle" id="controls-toggle" onclick="toggleSidebar()">⚙️</button>
+
+    <!-- Small webcam preview -->
+    <video id="webcam" class="webcam-preview" width="160" height="120" autoplay muted></video>
+
+    <!-- Hidden debug canvas -->
+    <canvas id="wave-only-canvas" width="320" height="240" style="display: none;"></canvas>
+
+    <script>
+        // Sidebar toggle functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('controls-sidebar');
+            const toggle = document.getElementById('controls-toggle');
+
+            sidebar.classList.toggle('collapsed');
+
+            if (sidebar.classList.contains('collapsed')) {
+                toggle.innerHTML = '⚙️';
+                toggle.title = 'Show Controls';
+            } else {
+                toggle.innerHTML = '✕';
+                toggle.title = 'Hide Controls';
+            }
+        }
+
+        // Section toggle functionality
+        function toggleSection(sectionId) {
+            const content = document.getElementById(sectionId + '-content');
+            const toggle = document.getElementById(sectionId + '-toggle');
+
+            content.classList.toggle('collapsed');
+
+            if (content.classList.contains('collapsed')) {
+                toggle.innerHTML = '▶';
+            } else {
+                toggle.innerHTML = '▼';
+            }
+        }
+
+        // Initialize sidebar as collapsed on mobile
+        if (window.innerWidth <= 768) {
+            document.getElementById('controls-sidebar').classList.add('collapsed');
+        }
+
+        // FPS counter
+        let frameCount = 0;
+        let lastTime = performance.now();
+
+        function updateFPS() {
+            frameCount++;
+            const now = performance.now();
+
+            if (now - lastTime >= 1000) {
+                const fps = Math.round(frameCount * 1000 / (now - lastTime));
+                document.getElementById('fps-info').textContent = `FPS: ${fps}`;
+                frameCount = 0;
+                lastTime = now;
+            }
+
+            requestAnimationFrame(updateFPS);
+        }
+        updateFPS();
+    </script>
+
+    <script type="module" src="src/main.js"></script>
+</body>
+
+</html>
