@@ -1,0 +1,24 @@
+{
+  "name": "BubbleBox",
+  "release": {
+    "comment_text": "",
+    "digests": {
+      "md5": "9495157e47a5fa4ed2d5e6b21d0d8355",
+      "sha256": "e9fff991ed59991d9f964da6f9bc28279546b9445bc9b144fda0cb770cb555bb"
+    },
+    "downloads": -1,
+    "filename": "bubblebox-0.49-py3-none-any.whl",
+    "has_sig": false,
+    "md5_digest": "9495157e47a5fa4ed2d5e6b21d0d8355",
+    "packagetype": "bdist_wheel",
+    "python_version": "py3",
+    "requires_python": null,
+    "size": 200146,
+    "upload_time": "2026-10-22T17:57:20.027639Z",
+    "upload_time_iso_8601": "2026-10-22T17:57:20.027639Z",
+    "url": "./bubblebox-0.49-py3-none-any.whl",
+    "yanked": false,
+    "yanked_reason": null
+  },
+  "version": "0.49"
+}

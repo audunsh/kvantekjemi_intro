@@ -1,0 +1,24 @@
+{
+  "name": "BraketLab",
+  "release": {
+    "comment_text": "",
+    "digests": {
+      "md5": "094b81937c7b6fb0bc10c9e692fe54bd",
+      "sha256": "a34ca201152eaccdcecb8fe7ea77125a18b8d89628b0a6ad3504b7a96dfe8c18"
+    },
+    "downloads": -1,
+    "filename": "braketlab-1.8.1-py3-none-any.whl",
+    "has_sig": false,
+    "md5_digest": "094b81937c7b6fb0bc10c9e692fe54bd",
+    "packagetype": "bdist_wheel",
+    "python_version": "py3",
+    "requires_python": null,
+    "size": 189090,
+    "upload_time": "2026-10-22T17:57:19.686065Z",
+    "upload_time_iso_8601": "2026-10-22T17:57:19.686065Z",
+    "url": "./braketlab-1.8.1-py3-none-any.whl",
+    "yanked": false,
+    "yanked_reason": null
+  },
+  "version": "1.8.1"
+}

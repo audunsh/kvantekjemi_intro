@@ -1,0 +1,14 @@
+{
+  "LiteBuildConfig": {
+    "contents": [
+      "/Users/audunskauhansen/Library/CloudStorage/Dropbox/backup_2026/projects/kvantekjemi_intro/lite_src/notebooks"
+    ],
+    "output_dir": "/Users/audunskauhansen/Library/CloudStorage/Dropbox/backup_2026/projects/kvantekjemi_intro/lite"
+  },
+  "PipliteAddon": {
+    "piplite_urls": [
+      "/Users/audunskauhansen/Library/CloudStorage/Dropbox/backup_2026/projects/kvantekjemi_intro/lite_src/wheels/braketlab-1.8.2-py3-none-any.whl",
+      "/Users/audunskauhansen/Library/CloudStorage/Dropbox/backup_2026/projects/kvantekjemi_intro/lite_src/wheels/bubblebox-0.50-py3-none-any.whl"
+    ]
+  }
+}
