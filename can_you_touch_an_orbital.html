@@ -1,0 +1,889 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Can You Touch an Orbital?</title>
+
+    <link rel="stylesheet" href="dist/reset.css">
+    <link rel="stylesheet" href="dist/reveal.css">
+    <link rel="stylesheet" href="dist/theme/white.css">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="plugin/highlight/zenburn.css">
+
+    <style>
+        .reveal .slide-background {
+            background-size: cover;
+        }
+
+        .highlight-box {
+            background: rgba(0, 136, 136, 0.9);
+            padding: 20px 40px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 204, 0.5);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px;
+            display: inline-block;
+            width: 280px;
+            vertical-align: top;
+        }
+
+        .quote-box {
+            background: rgba(0, 34, 34, 0.8);
+            border-left: 4px solid #22FFBB;
+            padding: 20px 30px;
+            margin: 20px auto;
+            max-width: 80%;
+            text-align: left;
+        }
+
+        .learning-goal {
+            background: rgba(0, 136, 136, 0.15);
+            border-radius: 8px;
+            padding: 15px 25px;
+            margin: 10px 0;
+            text-align: left;
+        }
+
+        .two-column {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .fade-text {
+            opacity: 0.7;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- ============================================= -->
+            <!-- SECTION 1: Opening & Context (3-5 min) -->
+            <!-- ============================================= -->
+
+            <section data-background-image="graphics/graded_background_1176.png" data-background-opacity="1"
+                data-background-size="120%">
+                <h3 class="r-fit-text">
+                    <font color="#00BBBB">&nbsp; VR, intuition, and quantum education &nbsp;</font>
+                </h3>
+                <h2>
+                    <span style="background-color: #008888; padding: 5px 20px;">
+                        <font color="#FFFFFF">Can You</font>
+                        <font color="#000000">Touch</font>
+                        <font color="#FFFFFF">an Orbital?</font>
+                    </span>
+                </h2>
+                <small>
+                    <span style="color: #FFFFFF">Audun Skau Hansen</span>
+                    <p></p>
+                    <span style="color: #FFFFFF">Chief Research Officer @ Myreze</span>
+                    <br>
+                    <span style="color: #BBBBBB">Previously: Senior lecturer @ KURT/UiO/Hylleraas</span>
+                </small>
+            </section>
+
+            <section data-background-iframe="https://audunsh.github.io/quantumcam"></section>
+
+            <section data-background-color="#002222">
+                <h3>
+                    <font color="#c5ad73">About me</font>
+                </h3>
+                <div class="two-column">
+                    <div>
+                        <img data-src="graphics/hylleraas-–-logo-–-white-– screen-–-rgb.png" height="80px">
+                        <p>
+                            <font color="#22FFBB">Theoretical & Quantum Chemistry</font>
+                        </p>
+                        <p class="fade-text"><small>Hylleraas Centre</small></p>
+                    </div>
+                    <div>
+                        <p>
+                            <font color="#22FFBB">Chemistry Education</font>
+                        </p>
+                        <p class="fade-text"><small>KURT/UiO, Learning Assistant Program</small></p>
+                    </div>
+                    <div>
+                        <p>
+                            <font color="#22FFBB">VR & Real-time 3D</font>
+                        </p>
+                        <p class="fade-text"><small>Myreze, 3D Deep Learning</small></p>
+                    </div>
+                </div>
+            </section>
+
+            <section data-background-color="#114433">
+                <img data-src="graphics/hylleraas-–-logo-–-white-– screen-–-rgb.png" height="120px">
+                <p></p>
+                <b>Hylleraas Centre for Theoretical Chemistry</b>
+                <p>A <a href="https://www.forskningsradet.no/sok-om-finansiering/midler-fra-forskningsradet/sff/">
+                        Centre of Excellence</a> developing simulation methods for molecules in complex and extreme
+                    environments.
+                </p>
+            </section>
+
+            <section data-background-iframe="https://www.4dv.ai/" data-background-interactive>
+            </section>
+
+            <section data-background-color="#002222">
+                <h2>
+                    <font color="#FFFFFF">The Question</font>
+                </h2>
+                <p>&nbsp;</p>
+                <div class="two-column">
+                    <div>
+                        <img src="graphics/basis_function.png" width="300px">
+                        <p><small>
+                                <font color="#888888">Textbook orbital</font>
+                            </small></p>
+                    </div>
+                    <div>
+                        <img src="graphics/mock_orbital.png" width="300px">
+                        <p><small>
+                                <font color="#888888">VR orbital</font>
+                            </small></p>
+                    </div>
+                </div>
+                <p>&nbsp;</p>
+                <h3>
+                    <font color="#22FFBB">Is it possible to touch an orbital?</font>
+                </h3>
+            </section>
+
+            <!-- ============================================= -->
+            <!-- SECTION 2: The "impossible" course (5-7 min) -->
+            <!-- ============================================= -->
+
+            <section data-background-image="graphics/dark_0.200000.png" data-background-size="120%">
+                <h2>
+                    <font color="#c5ad73">The "Impossible" Course</font>
+                </h2>
+                <p>
+                    <font color="#ffffcc">Physical Chemistry II – Intro to Quantum Chemistry</font>
+                </p>
+            </section>
+
+            <section data-background-image="graphics/dark_0.300000.png" data-background-size="110%">
+                <h3>
+                    <font color="#c5ad73">Course scope</font>
+                </h3>
+                <p>&nbsp;</p>
+                <div style="text-align: left; max-width: 700px; margin: 0 auto;">
+                    <p>
+                        <font color="#ffffff">→ Intro QM</font>
+                        <font color="#888888">(particle-in-a-box → hydrogen)</font>
+                    </p>
+                    <p>
+                        <font color="#ffffff">→ Many-body QM</font>
+                        <font color="#888888">(helium, molecules, ab initio)</font>
+                    </p>
+                    <p>
+                        <font color="#ffffff">→ Time-dependent QM</font>
+                        <font color="#888888">(IR, spectroscopy)</font>
+                    </p>
+                </div>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#22FFBB">10 credits. Basically a full bachelor unpacked.</font>
+                </p>
+            </section>
+
+            <section data-background-color="#002222">
+                <h3>
+                    <font color="#c5ad73">Cognitive bottlenecks</font>
+                </h3>
+                <p>&nbsp;</p>
+                <div class="stat-card">
+                    <font color="#22FFBB" size="5">Abstract notation</font>
+                    <p><small>Hilbert spaces, bra-ket, determinants</small></p>
+                </div>
+                <div class="stat-card">
+                    <font color="#22FFBB" size="5">Multiple scales</font>
+                    <p><small>electrons ↔ molecules ↔ spectra</small></p>
+                </div>
+                <div class="stat-card">
+                    <font color="#22FFBB" size="5">Weak visual intuition</font>
+                    <p><small>Static blobs in textbooks</small></p>
+                </div>
+            </section>
+
+            <section data-background-image="graphics/dark_0.700000.png" data-background-size="120%">
+                <h3>
+                    <font color="#c5ad73">Active learning helps, but...</font>
+                </h3>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffff">Even in LA-driven settings, students struggle to</font>
+                </p>
+                <p>
+                    <font color="#22FFBB">"see"</font>
+                    <font color="#ffffff">wavefunctions, correlation,<br>
+                        orbital pictures beyond static blobs.</font>
+                </p>
+                <p>&nbsp;</p>
+                <p class="fragment">
+                    <font color="#ffffcc">We need better embodied, interactive representations.</font>
+                </p>
+            </section>
+
+            <!-- ============================================= -->
+            <!-- SECTION 3: Workforce gap (5-7 min) -->
+            <!-- ============================================= -->
+
+            <section data-background-image="graphics/graded_background_2.png" data-background-size="120%">
+                <h2>
+                    <font color="#2b2e4a">The Quantum Workforce Challenge</font>
+                </h2>
+            </section>
+
+            <section data-background-color="#002222">
+                <h3>
+                    <font color="#c5ad73">Workforce shortage & skill mismatch</font>
+                </h3>
+                <p>&nbsp;</p>
+                <div class="quote-box">
+                    <font color="#ffffff">"Industry and academic experts expect a <font color="#22FFBB">shortage of
+                            qualified people</font>
+                        and stress the need for both deep physics and engineering/software skills."</font>
+                    <p><small>
+                            <font color="#888888">— Greinert et al., PRPER 2023</font>
+                        </small></p>
+                </div>
+                <p>&nbsp;</p>
+                <div class="quote-box">
+                    <font color="#ffffff">"The challenge of building a <font color="#22FFBB">diverse, sustainable
+                            quantum workforce</font>."</font>
+                    <p><small>
+                            <font color="#888888">— Kaur & Venegas-Gomez, 2022</font>
+                        </small></p>
+                </div>
+            </section>
+
+            <section data-background-color="#002222">
+                <h3>
+                    <font color="#c5ad73">Education is concentrated at grad/PhD level</font>
+                </h3>
+                <p>&nbsp;</p>
+                <div class="quote-box">
+                    <font color="#ffffff">"QIST education is <font color="#22FFBB">mostly at graduate/postdoc level
+                        </font>, with only early undergrad efforts."</font>
+                    <p><small>
+                            <font color="#888888">— Perron et al., QUEST 2021</font>
+                        </small></p>
+                </div>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#888888">Many STEM students see quantum as "only for physics elites".</font>
+                </p>
+            </section>
+
+            <section data-background-image="graphics/dark_0.900000.png" data-background-size="120%">
+                <h3>
+                    <font color="#c5ad73">The gap</font>
+                </h3>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffff">Most quantum chemistry & computing practitioners:</font>
+                </p>
+                <p>
+                    <font color="#22FFBB">Physics masters and PhDs</font>
+                </p>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffff">What we also need:</font>
+                </p>
+                <p>
+                    <font color="#ffffcc">Engineers, technicians, quantum-aware developers</font>
+                </p>
+                <p>&nbsp;</p>
+                <p class="fragment">
+                    <font color="#22FFBB">→ Better intuition-building tools</font>
+                </p>
+            </section>
+
+            <!-- ============================================= -->
+            <!-- SECTION 4: Compressed quantum chemistry (7-8 min) -->
+            <!-- ============================================= -->
+
+            <section data-background-image="graphics/galaxy_in_a_bottle.png">
+                <h1 class="r-fit-text">
+                    <font color="#008888">A first meeting with</font>
+                    <font color="#FFFFFF">quantum chemistry</font>
+                </h1>
+            </section>
+
+            <!-- 4.1 From classical to wave mechanics -->
+
+            <section data-background-image="graphics/dandelion.png">
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <div align="left">
+                    <font color="#008888">The universe is</font>
+                    <font color="BBBBAA"> dynamic</font>
+                </div>
+            </section>
+
+            <section data-background-image="graphics/dark_0.800000.png" data-background-size="110%">
+                <img src="graphics/doubleslit3.png" width="30%">
+                <img src="graphics/doubleslit4.png" width="30%">
+                <img src="graphics/doubleslit10.png" width="30%">
+                <h5>
+                    <font color="#c5ad73">Particles can have </font>
+                    <font color="#ffffff">wave properties</font>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/wavepcket_.png" data-background-size="120%">
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <h5>
+                    <font color="#000023">Louis De Broglie's waves (1924)</font>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/backdrop_general_3.png" data-background-size="120%">
+                <font color="#ffffff">
+                    $(-\frac{\hbar^2}{2m}\frac{\partial^2 }{\partial x^2} + V(x) ) \Psi = i \hbar
+                    \frac{\partial}{\partial t}\Psi$
+                </font>
+                <p>&nbsp;</p>
+                <h5>
+                    <font color="#c5ad73">Erwin Schrödinger's equation (1925)</font>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/graded_background_2.png" data-background-size="120%">
+                <img src="graphics/wavefunction_8.png" width="100%">
+                <h5>
+                    <font color="#c5ad73">Max Born's interpretation (1926)</font>
+                </h5>
+                <p>
+                    <font color="#2b2e4a">$|\Psi|^2$ gives probability density</font>
+                </p>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_6.png" data-background-size="120%">
+                <img src="graphics/debroglie.webp" height="250px">
+                <img src="graphics/schrodinger.jpg" height="250px">
+                <img src="graphics/max_born.jpg" height="250px">
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffcc">From particles and forces → wavefunctions and probabilities</font>
+                </p>
+            </section>
+
+            <!-- 4.2 From one particle to many -->
+
+            <section data-background-image="graphics/dark_0.700000.png" data-background-size="120%">
+                <img src="graphics/elm_0.png" width="25%">
+                <h4>
+                    <font color="#c5ad73">From one particle to many</font>
+                </h4>
+                <p>
+                    <font color="#ffffff">Helium: 2 electrons, 1 nucleus</font>
+                </p>
+            </section>
+
+            <section data-background-image="graphics/backdrop_general_3.png" data-background-size="120%">
+                <font color="#ffffff" size="5">
+                    $-\frac{\hbar^2}{2m_e}\left(\nabla_1^2 + \nabla_2^2\right)\Psi -
+                    \frac{2e^2}{4\pi\epsilon_0}\left(\frac{1}{r_1} + \frac{1}{r_2}\right)\Psi +
+                    \frac{e^2}{4\pi\epsilon_0}\frac{1}{r_{12}}\Psi = E\Psi$
+                </font>
+                <p>&nbsp;</p>
+                <h5>
+                    <font color="#c5ad73">The molecular Schrödinger equation</font>
+                </h5>
+            </section>
+
+            <section data-background-image="graphics/dark_0.200000.png" data-background-size="120%">
+                <font color="#ffffff">
+                    $E(\Psi_t) = \frac{\langle \Psi_t | \hat{H} | \Psi_t \rangle }{\langle \Psi_t | \Psi_t \rangle} \geq
+                    E_0$
+                </font>
+                <p>&nbsp;</p>
+                <h5>
+                    <font color="#c5ad73">The variational principle</font>
+                </h5>
+                <p>
+                    <font color="#888888">Any trial wavefunction gives energy ≥ exact ground state</font>
+                </p>
+            </section>
+
+            <section data-background-image="graphics/backdrop_general_3.png" data-background-size="120%">
+                <h4>
+                    <font color="#c5ad73">Requirements on $\Psi(x_1, x_2)$</font>
+                </h4>
+                <p>&nbsp;</p>
+                <font color="#ffffff">
+                    <ul>
+                        <li>Correct number of electrons</li>
+                        <li class="fragment">Normalizable: $\int |\Psi|^2 dx_1 dx_2 = 1$</li>
+                        <li class="fragment">
+                            <font color="#22FFBB">Antisymmetric:</font> $\Psi(x_1, x_2) = -\Psi(x_2, x_1)$
+                        </li>
+                        <li class="fragment">Physically reasonable fragmentation</li>
+                    </ul>
+                </font>
+            </section>
+
+            <section data-background-image="graphics/backdrop_general_3.png" data-background-size="120%">
+                <h5>
+                    <font color="#c5ad73">Simple product → Slater determinant</font>
+                </h5>
+                <p>&nbsp;</p>
+                <font color="#ffffff">
+                    <p>Hartree product: $\psi_1(x_1)\psi_2(x_2)$</p>
+                    <p class="fragment">↓</p>
+                    <p class="fragment">Slater determinant: $\frac{1}{\sqrt{2}}[\psi_1(x_1)\psi_2(x_2) -
+                        \psi_1(x_2)\psi_2(x_1)]$</p>
+                </font>
+                <p>&nbsp;</p>
+                <p class="fragment">
+                    <font color="#22FFBB">Antisymmetry built in!</font>
+                </p>
+            </section>
+
+            <!-- 4.3 Basis sets and orbitals -->
+
+            <section data-background-image="graphics/backdrop_kjm_4.png" style="text-align:center; color:#f9ffd0">
+                <p>A basis function</p>
+                <img src="graphics/basis_function.png" width="60%">
+                <p>$| \phi \rangle$</p>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_5.png" style="text-align:center; color:#f9ffd0">
+                <p>A basis set</p>
+                <img src="graphics/basis_2.png" width="60%">
+                <p>$\{ | \phi_i \rangle \}$</p>
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_14.png" style="text-align:center; color:#2b2e4a">
+                <p>Local vs delocalized basis functions</p>
+                <img src="graphics/basis_sidebyside.png" width="90%">
+            </section>
+
+            <section data-background-image="graphics/backdrop_kjm_12.png" style="text-align:center; color:#2b2e4a">
+                <p>Basis expansion</p>
+                <img src="graphics/basis_sum_1.png" width="60%">
+                <p>$| \psi \rangle = \sum_i | \phi_i \rangle c_i$</p>
+            </section>
+
+            <section data-background-color="#002222">
+                <h3>
+                    <font color="#c5ad73">The visualization problem</font>
+                </h3>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffff">Students see orbitals as</font>
+                </p>
+                <p>
+                    <font color="#22FFBB">static isosurfaces in a book</font>
+                </p>
+                <p>&nbsp;</p>
+                <p class="fragment">
+                    <font color="#ffffcc">What if we could walk into the basis expansion?</font>
+                </p>
+            </section>
+
+            <!-- ============================================= -->
+            <!-- SECTION 5: VR & Braketlab (10-12 min) -->
+            <!-- ============================================= -->
+
+            <section data-background-image="graphics/graded_background_1176.png">
+                <h1 class="r-fit-text">
+                    <font color="#FFFFFF">Stepping</font>
+                    <font color="#008888">Inside</font>
+                </h1>
+                <h3>
+                    <font color="#ffffff">VR + Braketlab as a didactic tool</font>
+                </h3>
+            </section>
+
+            <!-- 5.1 The shrinking metaphor -->
+
+            <section data-background-image="graphics/lab_blur.jpg" data-auto-animate>
+                <img src="graphics/sphere.png" width="400px">
+                <div align="center">
+                    <font color="#008888">A journey in scale</font>
+                </div>
+            </section>
+
+            <section data-background-image="graphics/lab_blur.jpg" data-auto-animate>
+                <img src="graphics/world_shrinked_5.png" width="400px">
+                <div align="center">
+                    <font color="#008888">A journey in scale</font>
+                </div>
+            </section>
+
+            <section data-background-image="graphics/lab_blur_dim.jpg">
+                <img src="graphics/world_shrinked_3.png" height="180%">
+                <font color="#008888">What is it like to shrink?</font>
+            </section>
+
+            <section data-background-color="#002222" data-auto-animate>
+                <img src="graphics/sphere_shrinked.png" width="400px">
+            </section>
+
+            <section data-background-color="#002222" data-auto-animate>
+                <img src="graphics/sphere_shrinked.png" width="10px">
+                <p>&nbsp;</p>
+                <font color="#c5ad73">Can everything in nature be </font>
+                <font color="#ffffcc">sensed?</font>
+            </section>
+
+            <section data-background-color="#002222">
+                <img src="graphics/sphere_shrinked.png" width="10px">
+                <p>&nbsp;</p>
+                <font color="#22FFBB">Small eyes</font>
+                <font color="#008888"> let in </font>
+                <font color="#22FFBB">little light.</font>
+                <p>&nbsp;</p>
+                <p class="fragment">
+                    <font color="#22FFBB">Low pressure</font>
+                    <font color="#008888"> means </font>
+                    <font color="#22FFBB">few neighbors.</font>
+                </p>
+            </section>
+
+            <section data-background-color="#002222">
+                <h3>
+                    <font color="#c5ad73">VR lets us cheat</font>
+                </h3>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffff">We can artificially</font>
+                </p>
+                <p>
+                    <font color="#22FFBB">enlarge, slow down, and externalize</font>
+                </p>
+                <p>
+                    <font color="#ffffff">wavefunctions until they become</font>
+                </p>
+                <p>
+                    <font color="#ffffcc">navigable objects.</font>
+                </p>
+            </section>
+
+            <!-- 5.2 Braketlab overview -->
+
+            <section data-background-image="graphics/dark_0.300000.png" data-background-size="110%">
+                <h3>
+                    <font color="#c5ad73">Braketlab: The pipeline</font>
+                </h3>
+                <p>&nbsp;</p>
+                <div style="text-align: left; max-width: 800px; margin: 0 auto;">
+                    <p>
+                        <font color="#22FFBB">1.</font>
+                        <font color="#ffffff">Jupyter + Braketlab:</font>
+                        <font color="#888888">define model systems, orbitals, wavefunctions</font>
+                    </p>
+                    <p>&nbsp;</p>
+                    <p>
+                        <font color="#22FFBB">2.</font>
+                        <font color="#ffffff">Export:</font>
+                        <font color="#888888">grids / isosurfaces as JSON/mesh</font>
+                    </p>
+                    <p>&nbsp;</p>
+                    <p>
+                        <font color="#22FFBB">3.</font>
+                        <font color="#ffffff">Load into VR:</font>
+                        <font color="#888888">WebXR, Evince → headset</font>
+                    </p>
+                </div>
+            </section>
+
+            <section data-background-color="#002222">
+                <h3>
+                    <font color="#c5ad73">What students can do</font>
+                </h3>
+                <p>&nbsp;</p>
+                <div class="stat-card">
+                    <font color="#22FFBB">Walk around nodes</font>
+                    <p><small>Navigate 3D nodal structure</small></p>
+                </div>
+                <div class="stat-card">
+                    <font color="#22FFBB">Slice through densities</font>
+                    <p><small>Interactive cross-sections</small></p>
+                </div>
+                <div class="stat-card">
+                    <font color="#22FFBB">Stick head into orbital</font>
+                    <p><small>Embodied exploration</small></p>
+                </div>
+                <p>&nbsp;</p>
+                <p class="fragment">
+                    <font color="#ffffcc">Change parameters in Python → immediately see shape update</font>
+                </p>
+            </section>
+
+            <!-- 5.3 Quantum intuition lab -->
+
+            <section data-background-image="graphics/dark_0.700000.png" data-background-size="120%">
+                <h3>
+                    <font color="#c5ad73">Quantum Intuition Lab: Helium</font>
+                </h3>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffff">Visualizing electron correlation</font>
+                </p>
+            </section>
+
+            <section data-background-color="#002222">
+                <h4>
+                    <font color="#c5ad73">Step 1: Hartree product</font>
+                </h4>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffff">$\psi_1(x_1) \cdot \psi_2(x_2)$</font>
+                </p>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#888888">Product of two 1s-like orbitals</font>
+                </p>
+                <p>
+                    <font color="#22FFBB">No explicit electron–electron correlation</font>
+                </p>
+                <p>
+                    <font color="#888888">(only mean-field)</font>
+                </p>
+            </section>
+
+            <section data-background-color="#002222">
+                <h4>
+                    <font color="#c5ad73">Step 2: Slater determinant</font>
+                </h4>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffff">$\frac{1}{\sqrt{2}}[\psi_1(x_1)\psi_2(x_2) - \psi_1(x_2)\psi_2(x_1)]$</font>
+                </p>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#888888">What antisymmetry implies visually:</font>
+                </p>
+                <p>
+                    <font color="#22FFBB">Nodal structure when electrons "swap"</font>
+                </p>
+                <p>
+                    <font color="#22FFBB">Pauli exclusion as geometry</font>
+                </p>
+            </section>
+
+            <section data-background-color="#002222">
+                <h4>
+                    <font color="#c5ad73">Step 3: Correlated wavefunction</font>
+                </h4>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#888888">Hylleraas-style correlation:</font>
+                </p>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffff">Show marginal densities</font>
+                </p>
+                <p>
+                    <font color="#22FFBB">Visualize the "correlation hole"</font>
+                </p>
+                <p>
+                    <font color="#888888">around one electron</font>
+                </p>
+            </section>
+
+            <section data-background-image="graphics/dark_0.900000.png" data-background-size="120%">
+                <div class="quote-box">
+                    <font color="#ffffff">"Instead of telling students 'there is electron correlation',
+                        we can <font color="#22FFBB">show them</font> how different approximations change
+                        the shape of electron density, in an environment their body can navigate."</font>
+                </div>
+            </section>
+
+            <section data-background-color="#002222">
+                <h4>
+                    <font color="#c5ad73">Connection to ab initio + ML</font>
+                </h4>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffff">The same geometric intuitions:</font>
+                </p>
+                <p>
+                    <font color="#22FFBB">basis expansions, correlation holes, nodal surfaces</font>
+                </p>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffff">underpin modern ML potentials and quantum-chemistry pipelines.</font>
+                </p>
+                <p>&nbsp;</p>
+                <p class="fragment">
+                    <font color="#ffffcc">VR helps students see and debug these models, not just run them.</font>
+                </p>
+            </section>
+
+            <section data-background-iframe="H2O_orbital.html">
+                <div style="background: rgba(0,34,34,0.8); padding: 20px; border-radius: 8px; display: inline-block;">
+                    <font color="#22FFBB">Interactive orbital visualization</font>
+                </div>
+            </section>
+
+            <!-- ============================================= -->
+            <!-- SECTION 6: Closing the loop (3-5 min) -->
+            <!-- ============================================= -->
+
+            <section data-background-image="graphics/graded_background_1176.png">
+                <h2>
+                    <font color="#FFFFFF">Closing the</font>
+                    <font color="#008888">Loop</font>
+                </h2>
+            </section>
+
+            <section data-background-color="#002222">
+                <h3>
+                    <font color="#c5ad73">Can you touch an orbital?</font>
+                </h3>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffff">Not literally, but we can get very close to a</font>
+                </p>
+                <p>
+                    <font color="#22FFBB">tactile, embodied understanding</font>
+                </p>
+                <p>
+                    <font color="#ffffff">of wavefunctions.</font>
+                </p>
+            </section>
+
+            <section data-background-color="#002222">
+                <h4>
+                    <font color="#c5ad73">European Competence Framework</font>
+                </h4>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffff">Calls for a spectrum of roles beyond academic theorists:</font>
+                </p>
+                <p>&nbsp;</p>
+                <div class="stat-card">
+                    <font color="#22FFBB">Software</font>
+                </div>
+                <div class="stat-card">
+                    <font color="#22FFBB">Engineering</font>
+                </div>
+                <div class="stat-card">
+                    <font color="#22FFBB">Applications</font>
+                </div>
+                <p>&nbsp;</p>
+                <p class="fragment">
+                    <font color="#ffffcc">VR + computational playgrounds make Hilbert space tangible</font>
+                </p>
+            </section>
+
+            <section data-background-image="graphics/dark_0.300000.png" data-background-size="110%">
+                <h4>
+                    <font color="#c5ad73">Practical applications</font>
+                </h4>
+                <p>&nbsp;</p>
+                <div style="text-align: left; max-width: 700px; margin: 0 auto;">
+                    <div class="learning-goal">
+                        <font color="#22FFBB">→</font>
+                        <font color="#ffffff">Lab modules in existing quantum courses</font>
+                    </div>
+                    <div class="learning-goal">
+                        <font color="#22FFBB">→</font>
+                        <font color="#ffffff">On-ramp for non-physics students into quantum literacy</font>
+                    </div>
+                    <div class="learning-goal">
+                        <font color="#22FFBB">→</font>
+                        <font color="#ffffff">Bridge between ab initio simulation and quantum computing</font>
+                    </div>
+                </div>
+            </section>
+
+            <section data-background-color="#002222">
+                <h4>
+                    <font color="#c5ad73">Learning goals after a VR orbital session</font>
+                </h4>
+                <p>&nbsp;</p>
+                <div style="text-align: left; max-width: 750px; margin: 0 auto;">
+                    <div class="learning-goal">
+                        <font color="#22FFBB">1.</font> Verbally describe nodes and lobes in simple orbitals
+                    </div>
+                    <div class="learning-goal">
+                        <font color="#22FFBB">2.</font> Predict qualitatively how changing basis/approximation changes
+                        shape
+                    </div>
+                    <div class="learning-goal">
+                        <font color="#22FFBB">3.</font> Connect shapes to terms in a variational ansatz
+                    </div>
+                </div>
+                <p>&nbsp;</p>
+                <p><small>
+                        <font color="#888888">Formal evaluation is future work</font>
+                    </small></p>
+            </section>
+
+            <section data-background-color="#002222">
+                <h4>
+                    <font color="#c5ad73">The quantum computing connection</font>
+                </h4>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#ffffff">Orbitals live in a huge Hilbert space.</font>
+                </p>
+                <p>
+                    <font color="#ffffff">Qubits are another way of slicing that space.</font>
+                </p>
+                <p>&nbsp;</p>
+                <p>
+                    <font color="#22FFBB">Same need for intuition about:</font>
+                </p>
+                <p>
+                    <font color="#ffffcc">superposition, basis choice, entanglement</font>
+                </p>
+            </section>
+
+            <section data-background-iframe="H2O_orbital.html">
+                <img data-src="graphics/mock_orbital.png" height="100px" align="left">
+                <p>&nbsp;</p>
+                <div
+                    style="background: rgba(0,34,34,0.9); padding: 30px 50px; border-radius: 12px; display: inline-block;">
+                    <h2>
+                        <font color="#22FFBB">Thank you!</font>
+                    </h2>
+                    <p>
+                        <font color="#ffffff">audun@myreze.com</font>
+                    </p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/math/math.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            plugins: [RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX]
+        });
+    </script>
+</body>
+
+</html>

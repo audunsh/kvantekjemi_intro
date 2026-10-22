@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Shader mask generator</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Orbit controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
+
+        // Global variables
+        let mesh;
+        let modelCentroid = new THREE.Vector3(0, 0, 1);
+        let usingCustomShader = false;
+        const originalMaterials = new Map();
+        let initialPixelCounts = null;
+        let hasCalculatedInitialCounts = false;
+        let frameCount = 0;
+        const updateInterval = 10;
+        let dataTexture = null;
+        let triangleColorMap = null;
+        let triangleCountTexture = null;
+        let initialNormalDots = null;
+        let hasCalculatedInitialDots = false;
+        let renderTarget, countingScene;
+        let currentModelGroup = null; // Group to hold the current model
+
+        // Load a model automatically when the page loads
+        loadModel('computer_room_0.glb');
+
+        // Function to load a GLB model
+        function loadModel(filename) {
+            console.log(`Loading model: ${filename}`);
+
+            // Unload current model if it exists
+            if (currentModelGroup) {
+                // Remove from scene
+                scene.remove(currentModelGroup);
+
+                // Dispose of geometries and materials
+                currentModelGroup.traverse((child) => {
+                    if (child.isMesh) {
+                        if (child.geometry) {
+                            child.geometry.dispose();
+                        }
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(material => material.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    }
+                });
+
+                // Clear references
+                currentModelGroup = null;
+                mesh = null;
+                originalMaterials.clear();
+
+                // Reset shader state
+                usingCustomShader = true;
+                hasCalculatedInitialCounts = false;
+                initialPixelCounts = null;
+                dataTexture = null;
+
+                // Clean up render targets if they exist
+                if (renderTarget) {
+                    renderTarget.dispose();
+                    renderTarget = null;
+                }
+
+                console.log('Previous model unloaded');
+            }
+
+            // Create a new group for the model
+            currentModelGroup = new THREE.Group();
+            scene.add(currentModelGroup);
+
+            // Reset camera to initial position
+            camera.position.set(0, 0, 0);
+            camera.rotation.set(0, 0, Math.PI);
+
+            // Load the new GLB file
+            const loader = new GLTFLoader();
+            const glbUrl = `./${filename}`;
+
+            loader.load(glbUrl, (gltf) => {
+                // Add the loaded scene to our model group
+                currentModelGroup.add(gltf.scene);
+
+                // Find all meshes in the scene
+                let meshesWithGeometry = [];
+                gltf.scene.traverse((child) => {
+                    if (child.isMesh && child.geometry) {
+                        originalMaterials.set(child, child.material);
+                        meshesWithGeometry.push(child);
+                    }
+                });
+
+                // Use the first mesh with geometry
+                if (meshesWithGeometry.length > 0) {
+                    mesh = meshesWithGeometry[0];
+
+                    // Calculate the centroid of the model's vertices
+                    const geometry = mesh.geometry;
+                    const positionAttribute = geometry.attributes.position;
+                    const vertexCount = positionAttribute.count;
+
+                    // Initialize centroid and create a bounding box
+                    modelCentroid.set(0, 0, 0);
+                    const boundingBox = new THREE.Box3();
+
+                    // Calculate bounding box and sum all vertex positions
+                    const vertex = new THREE.Vector3();
+                    for (let i = 0; i < vertexCount; i++) {
+                        vertex.fromBufferAttribute(positionAttribute, i);
+                        // Apply mesh's world transform to get world position
+                        vertex.applyMatrix4(mesh.matrixWorld);
+                        boundingBox.expandByPoint(vertex);
+                        modelCentroid.add(vertex);
+                    }
+
+                    // Divide by vertex count to get average
+                    if (vertexCount > 0) {
+                        modelCentroid.divideScalar(vertexCount);
+                    }
+
+                    console.log('Model centroid:', modelCentroid);
+                    console.log('Bounding box:', boundingBox);
+
+                    // Update camera to look at the model centroid
+                    camera.lookAt(modelCentroid);
+                    controls.target.copy(modelCentroid);
+
+                    // Calculate the required FOV to frame the bounding box
+                    fitCameraToObject(camera, boundingBox, modelCentroid);
+
+                    controls.update();
+
+                    // Ensure we start with the normal texture shader (original material)
+                    if (usingCustomShader) {
+                        toggleMaterial(); // Toggle to original material if we're using custom shader
+                    }
+
+                    console.log('Initial shader state: original material (normal texture)');
+                } else {
+                    console.warn('No meshes with geometry found in the model');
+                    controls.enabled = true;
+                }
+
+                // Apply custom shader by default
+                if (mesh) {
+                    toggleMaterial();
+                }
+
+                console.log(`Model ${filename} loaded successfully`);
+            }, undefined, (error) => {
+                console.error(`Error loading GLB ${filename}:`, error);
+            });
+        }
+
+        // Function to fit camera FOV to object bounding box
+        function fitCameraToObject(camera, boundingBox, centroid) {
+            // Get bounding box dimensions
+            const size = new THREE.Vector3();
+            boundingBox.getSize(size);
+
+            // Get the camera position
+            const cameraPosition = camera.position.clone();
+
+            // Calculate distance from camera to centroid
+            const distanceToCenter = cameraPosition.distanceTo(centroid);
+
+            // Calculate the required FOV
+            // We need to consider both horizontal and vertical dimensions
+            const aspect = window.innerWidth / window.innerHeight;
+
+            // Calculate the FOV needed for width and height
+            const boundingWidth = size.x;
+            const boundingHeight = size.y;
+
+            // Calculate the FOV in radians
+            const fovRadiansHeight = 2 * Math.atan(boundingHeight / (2 * distanceToCenter));
+            const fovRadiansWidth = 2 * Math.atan(boundingWidth / (2 * distanceToCenter * aspect));
+
+            // Use the larger FOV to ensure the entire object is visible
+            const fovRadians = Math.max(fovRadiansHeight, fovRadiansWidth);
+
+            // Convert to degrees and add a small margin (10%)
+            const fovDegrees = (fovRadians * 180 / Math.PI) * 1.1;
+
+            console.log('Calculated FOV:', fovDegrees);
+
+            // Update camera FOV
+            camera.fov = fovDegrees;
+            camera.updateProjectionMatrix();
+
+            return fovDegrees;
+        }
+
+        // Function to calculate normal-camera dot products for each triangle
+        function calculateNormalDotProducts(geometry, camera, object) {
+            const positionAttr = geometry.attributes.position;
+            const indexAttr = geometry.index;
+            const triangleCount = indexAttr ? indexAttr.count / 3 : positionAttr.count / 3;
+            const dotProducts = new Float32Array(triangleCount);
+
+            // Camera position in world space
+            const cameraPosition = new THREE.Vector3();
+            camera.getWorldPosition(cameraPosition);
+
+            // Object's world matrix for transforming positions and normals
+            const worldMatrix = object.matrixWorld;
+            const normalMatrix = new THREE.Matrix3().getNormalMatrix(worldMatrix);
+
+            // Temporary vectors
+            const v0 = new THREE.Vector3();
+            const v1 = new THREE.Vector3();
+            const v2 = new THREE.Vector3();
+            const normal = new THREE.Vector3();
+            const edge1 = new THREE.Vector3();
+            const edge2 = new THREE.Vector3();
+            const center = new THREE.Vector3();
+            const viewDirection = new THREE.Vector3();
+
+            // Calculate dot product for each triangle
+            for (let i = 0; i < triangleCount; i++) {
+                // Get vertex indices
+                let idx0, idx1, idx2;
+                if (indexAttr) {
+                    idx0 = indexAttr.getX(i * 3);
+                    idx1 = indexAttr.getX(i * 3 + 1);
+                    idx2 = indexAttr.getX(i * 3 + 2);
+                } else {
+                    idx0 = i * 3;
+                    idx1 = i * 3 + 1;
+                    idx2 = i * 3 + 2;
+                }
+
+                // Get vertex positions in local space
+                v0.set(
+                    positionAttr.getX(idx0),
+                    positionAttr.getY(idx0),
+                    positionAttr.getZ(idx0)
+                );
+                v1.set(
+                    positionAttr.getX(idx1),
+                    positionAttr.getY(idx1),
+                    positionAttr.getZ(idx1)
+                );
+                v2.set(
+                    positionAttr.getX(idx2),
+                    positionAttr.getY(idx2),
+                    positionAttr.getZ(idx2)
+                );
+
+                // Calculate triangle normal in local space
+                edge1.subVectors(v1, v0);
+                edge2.subVectors(v2, v0);
+                normal.crossVectors(edge1, edge2).normalize();
+
+                // Transform vertices and normal to world space
+                v0.applyMatrix4(worldMatrix);
+                v1.applyMatrix4(worldMatrix);
+                v2.applyMatrix4(worldMatrix);
+                normal.applyMatrix3(normalMatrix).normalize();
+
+                // Calculate triangle center in world space
+                center.addVectors(v0, v1).add(v2).multiplyScalar(1 / 3);
+
+                // Calculate view direction from camera to triangle center
+                viewDirection.subVectors(center, cameraPosition).normalize();
+
+                // Calculate absolute value of dot product between normal and view direction
+                // This gives us how aligned the normal is with the view direction
+                // 0 = perpendicular (most stretched), 1 = parallel (least stretched)
+                const dotProduct = Math.abs(normal.dot(viewDirection));
+
+                // Store the dot product
+                dotProducts[i] = dotProduct;
+            }
+
+            return dotProducts;
+        }
+
+        // Function to create a render target for pixel counting
+        function createTriangleCountingRenderer(width, height) {
+            // Create a render target
+            const renderTarget = new THREE.WebGLRenderTarget(width, height, {
+                format: THREE.RGBAFormat,
+                type: THREE.UnsignedByteType
+            });
+
+            // Create a scene for rendering triangles with unique colors
+            const countingScene = new THREE.Scene();
+            countingScene.background = new THREE.Color(0x000000); // Black background
+
+            return {
+                renderTarget,
+                countingScene
+            };
+        }
+
+        // Create a material that assigns a unique color to each triangle
+        function createTriangleIDMaterial(triangleCount) {
+            // Create a map of triangle IDs to colors
+            triangleColorMap = new Map();
+
+            return new THREE.ShaderMaterial({
+                vertexShader: `
+                    in float triangleId;
+                    flat out float vTriangleId;
+                    void main() {
+                        vTriangleId = triangleId;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    flat in float vTriangleId;
+                    out vec4 fragColor;
+                    
+                    void main() {
+                        // Convert triangle ID to a unique RGB color
+                        float id = vTriangleId;
+                        float r = mod(id, 256.0) / 255.0;
+                        float g = mod(floor(id / 256.0), 256.0) / 255.0;
+                        float b = mod(floor(id / 65536.0), 256.0) / 255.0;
+                        
+                        fragColor = vec4(r, g, b, 1.0);
+                    }
+                `,
+                glslVersion: THREE.GLSL3
+            });
+        }
+
+        // Function to count pixels for each triangle
+        function countTrianglePixels(renderer, renderTarget, triangleCount) {
+            // Read pixels from the render target
+            const width = renderTarget.width;
+            const height = renderTarget.height;
+            const pixelBuffer = new Uint8Array(width * height * 4);
+
+            renderer.readRenderTargetPixels(renderTarget, 0, 0, width, height, pixelBuffer);
+
+            // Count pixels for each triangle
+            const pixelCounts = new Float32Array(triangleCount);
+
+            for (let i = 0; i < pixelBuffer.length; i += 4) {
+                if (pixelBuffer[i + 3] === 0) continue; // Skip transparent pixels
+
+                // Convert RGB color back to triangle ID
+                const r = pixelBuffer[i];
+                const g = pixelBuffer[i + 1];
+                const b = pixelBuffer[i + 2];
+
+                const triangleId = r + (g * 256) + (b * 65536);
+
+                if (triangleId < triangleCount) {
+                    pixelCounts[triangleId]++;
+                }
+            }
+
+            return pixelCounts;
+        }
+
+        // Modified toggle function
+        function toggleMaterial() {
+            if (!mesh) return;
+
+            if (usingCustomShader) {
+                // Switch to original material but make it visible without lighting
+                if (originalMaterials.has(mesh)) {
+                    const originalMaterial = originalMaterials.get(mesh);
+
+                    // Log information about the original material
+                    console.log("Original material type:", originalMaterial.type);
+                    console.log("Has map texture:", !!originalMaterial.map);
+
+                    // Create a new MeshBasicMaterial that always shows the texture regardless of lighting
+                    let brightMaterial;
+
+                    if (originalMaterial.map) {
+                        // If the original material has a texture map, use it
+                        brightMaterial = new THREE.MeshBasicMaterial({
+                            map: originalMaterial.map,
+                            color: 0xffffff, // Full white to show texture at full brightness
+                            side: originalMaterial.side || THREE.FrontSide
+                        });
+                        console.log("Using texture from original material");
+                    } else if (originalMaterial.color) {
+                        // If it has a color, use that
+                        brightMaterial = new THREE.MeshBasicMaterial({
+                            color: originalMaterial.color,
+                            side: originalMaterial.side || THREE.FrontSide
+                        });
+                        console.log("Using color from original material:", originalMaterial.color);
+                    } else {
+                        // Fallback to a light grey
+                        brightMaterial = new THREE.MeshBasicMaterial({
+                            color: 0xdddddd,
+                            side: originalMaterial.side || THREE.FrontSide
+                        });
+                        console.log("Using default light grey color");
+                    }
+
+                    // Copy other relevant properties
+                    if (originalMaterial.transparent) {
+                        brightMaterial.transparent = true;
+                        brightMaterial.opacity = originalMaterial.opacity;
+                    }
+
+                    // Apply the new material
+                    mesh.material = brightMaterial;
+
+                    // Add ambient light to the scene to ensure everything is visible
+                    if (!scene.getObjectByName("ambientLight")) {
+                        const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+                        ambientLight.name = "ambientLight";
+                        scene.add(ambientLight);
+                        console.log("Added ambient light to scene");
+                    }
+                } else {
+                    console.warn("No original material found for mesh");
+                    // Create a simple bright material as fallback
+                    mesh.material = new THREE.MeshBasicMaterial({ color: 0xdddddd });
+                }
+
+                hasCalculatedInitialCounts = false; // Reset when switching back to original
+            } else {
+                // Store original material
+                if (!originalMaterials.has(mesh)) {
+                    originalMaterials.set(mesh, mesh.material.clone());
+                }
+
+                const geometry = mesh.geometry;
+                const triangleCount = geometry.index ? geometry.index.count / 3 : geometry.attributes.position.count / 3;
+
+                // Check if we've already stored initial areas
+                const hasInitialAreas = geometry.attributes.initialArea !== undefined;
+
+                // Add additional attributes to store triangle data
+                if (!geometry.attributes.triangleV1 || !geometry.attributes.triangleV2 || !geometry.attributes.triangleV3) {
+                    console.log("Creating triangle vertex attributes");
+                    const positions = geometry.attributes.position.array;
+                    const indices = geometry.index ? geometry.index.array : null;
+                    const vertexCount = geometry.attributes.position.count;
+
+                    // Create arrays for the triangle vertices
+                    const triangleV1 = new Float32Array(vertexCount * 3);
+                    const triangleV2 = new Float32Array(vertexCount * 3);
+                    const triangleV3 = new Float32Array(vertexCount * 3);
+
+                    // For each triangle, store its vertices in attributes
+                    for (let i = 0; i < triangleCount; i++) {
+                        // Get vertex indices for this triangle
+                        let v1Idx, v2Idx, v3Idx;
+                        if (indices) {
+                            v1Idx = indices[i * 3];
+                            v2Idx = indices[i * 3 + 1];
+                            v3Idx = indices[i * 3 + 2];
+                        } else {
+                            v1Idx = i * 3;
+                            v2Idx = i * 3 + 1;
+                            v3Idx = i * 3 + 2;
+                        }
+
+                        // Get vertex positions from the position buffer
+                        const v1 = {
+                            x: positions[v1Idx * 3],
+                            y: positions[v1Idx * 3 + 1],
+                            z: positions[v1Idx * 3 + 2]
+                        };
+                        const v2 = {
+                            x: positions[v2Idx * 3],
+                            y: positions[v2Idx * 3 + 1],
+                            z: positions[v2Idx * 3 + 2]
+                        };
+                        const v3 = {
+                            x: positions[v3Idx * 3],
+                            y: positions[v3Idx * 3 + 1],
+                            z: positions[v3Idx * 3 + 2]
+                        };
+
+                        // For each vertex of this triangle, store all three vertices
+                        // This ensures each vertex shader invocation has access to the full triangle
+                        for (let j = 0; j < 3; j++) {
+                            let vIdx;
+                            if (indices) {
+                                vIdx = indices[i * 3 + j];
+                            } else {
+                                vIdx = i * 3 + j;
+                            }
+
+                            // Store all three triangle vertices at this vertex's position in the buffers
+                            triangleV1[vIdx * 3] = v1.x;
+                            triangleV1[vIdx * 3 + 1] = v1.y;
+                            triangleV1[vIdx * 3 + 2] = v1.z;
+
+                            triangleV2[vIdx * 3] = v2.x;
+                            triangleV2[vIdx * 3 + 1] = v2.y;
+                            triangleV2[vIdx * 3 + 2] = v2.z;
+
+                            triangleV3[vIdx * 3] = v3.x;
+                            triangleV3[vIdx * 3 + 1] = v3.y;
+                            triangleV3[vIdx * 3 + 2] = v3.z;
+                        }
+                    }
+
+                    // Add the triangle vertex attributes to the geometry
+                    geometry.setAttribute('triangleV1', new THREE.BufferAttribute(triangleV1, 3));
+                    geometry.setAttribute('triangleV2', new THREE.BufferAttribute(triangleV2, 3));
+                    geometry.setAttribute('triangleV3', new THREE.BufferAttribute(triangleV3, 3));
+                }
+
+                // If this is the first time, create the initialArea attribute
+                if (!hasInitialAreas) {
+                    const vertexCount = geometry.attributes.position.count;
+                    const initialAreaArray = new Float32Array(vertexCount);
+                    geometry.setAttribute('initialArea', new THREE.BufferAttribute(initialAreaArray, 1));
+
+                    // Flag to track initialization
+                    mesh.userData.initialAreasCalculated = false;
+                }
+
+                // Create shader material that handles both initialization and visualization
+                const areaShader = new THREE.ShaderMaterial({
+                    uniforms: {
+                        isFirstFrame: { value: !mesh.userData.initialAreasCalculated ? 1.0 : 0.0 },
+                        sigmoidSteepness: { value: 5.0 }
+                    },
+                    vertexShader: `
+                        in float triangleId;
+                        in float initialArea;
+                        in vec3 triangleV1;
+                        in vec3 triangleV2;
+                        in vec3 triangleV3;
+                        
+                        flat out float vTriangleId;
+                        flat out float vInitialArea;
+                        out vec4 vScreenPosition;
+                        flat out vec4 vScreenV1;
+                        flat out vec4 vScreenV2;
+                        flat out vec4 vScreenV3;
+                        
+                        void main() {
+                            vTriangleId = triangleId;
+                            vInitialArea = initialArea;
+                            
+                            // Calculate clip-space positions for all three vertices of the triangle
+                            vec4 clipV1 = projectionMatrix * modelViewMatrix * vec4(triangleV1, 1.0);
+                            vec4 clipV2 = projectionMatrix * modelViewMatrix * vec4(triangleV2, 1.0);
+                            vec4 clipV3 = projectionMatrix * modelViewMatrix * vec4(triangleV3, 1.0);
+                            
+                            // Store the clip-space positions to pass to the fragment shader
+                            vScreenV1 = clipV1;
+                            vScreenV2 = clipV2;
+                            vScreenV3 = clipV3;
+                            
+                            // Actual vertex position for this vertex
+                            vec4 worldPos = modelViewMatrix * vec4(position, 1.0);
+                            gl_Position = projectionMatrix * worldPos;
+                            vScreenPosition = gl_Position;
+                        }
+                    `,
+                    fragmentShader: `
+                        uniform float isFirstFrame;
+                        uniform float sigmoidSteepness;
+                        
+                        flat in float vTriangleId;
+                        flat in float vInitialArea;
+                        in vec4 vScreenPosition;
+                        flat in vec4 vScreenV1;
+                        flat in vec4 vScreenV2;
+                        flat in vec4 vScreenV3;
+                        
+                        out vec4 fragColor;
+                        
+                        // Function to calculate screen-space coordinates
+                        vec2 getScreenCoords(vec4 clipSpace) {
+                            vec3 ndc = clipSpace.xyz / clipSpace.w;
+                            return ndc.xy * 0.5 + 0.5;
+                        }
+                        
+                        // Function to calculate the screen-space area of a triangle
+                        float calculateScreenArea(vec4 p1, vec4 p2, vec4 p3) {
+                            // Convert to screen space coordinates
+                            vec2 s1 = getScreenCoords(p1);
+                            vec2 s2 = getScreenCoords(p2);
+                            vec2 s3 = getScreenCoords(p3);
+                            
+                            // Calculate area using cross product
+                            vec2 e1 = s2 - s1;
+                            vec2 e2 = s3 - s1;
+                            return abs(e1.x * e2.y - e1.y * e2.x) * 0.5;
+                        }
+                        
+                        // Sigmoid function for smooth transition
+                        float sigmoid(float x) {
+                            return 1.0 / (1.0 + exp(-x));
+                        }
+                        
+                        void main() {
+                            // Calculate the current triangle's screen-space area using the vertices passed from vertex shader
+                            float currentScreenArea = calculateScreenArea(vScreenV1, vScreenV2, vScreenV3);
+                            
+                            // Use triangle ID for initial debug visualization
+                            float triangleId = vTriangleId;
+                            
+                            // Rainbow color based on triangle ID for debugging
+                            vec3 rainbowColor = vec3(
+                                0.5 + 0.5 * sin(triangleId * 0.1),
+                                0.5 + 0.5 * sin(triangleId * 0.1 + 2.0),
+                                0.5 + 0.5 * sin(triangleId * 0.1 + 4.0)
+                            );
+                            
+                            if (isFirstFrame > 0.5) {
+                                // First frame - just show the triangle IDs and don't compare areas yet
+                                fragColor = vec4(rainbowColor, 1.0);
+                                return;
+                            }
+                            
+                            // Get the stored initial area value
+                            float initialArea = max(0.00001, vInitialArea);
+                            
+                            // Calculate ratio of current to initial area
+                            float ratio = currentScreenArea / initialArea;
+                            
+                            // Apply log transformation to make ratio changes more visible
+                            float logRatio = log(max(0.00001, ratio));
+                            
+                            // Use sigmoid to map to 0-1 range
+                            float t = sigmoid(sigmoidSteepness * logRatio);
+                            
+                            // Create color scale from blue (more visible) to red (less visible)
+                            vec3 color;
+                            if (t < 0.4) {
+                                // Blue range - significantly more visible now
+                                color = mix(
+                                    vec3(0.0, 0.0, 0.8), // Dark blue (much more visible)
+                                    vec3(0.2, 0.4, 0.8), // Light blue (somewhat more visible)
+                                    t / 0.4
+                                );
+                            } else if (t < 0.6) {
+                                // Neutral range - about the same visibility
+                                color = mix(
+                                    vec3(0.2, 0.4, 0.8), // Light blue
+                                    vec3(0.8, 0.4, 0.2), // Light red
+                                    (t - 0.4) / 0.2
+                                );
+                            } else {
+                                // Red range - significantly less visible now
+                                color = mix(
+                                    vec3(0.8, 0.4, 0.2), // Light red (somewhat less visible)
+                                    vec3(0.8, 0.0, 0.0), // Dark red (much less visible)
+                                    (t - 0.6) / 0.4
+                                );
+                            }
+                            
+                            // Ensure minimum brightness
+                            color = max(color, vec3(0.2));
+                            
+                            // Uncomment for raw ratio testing:
+                            color = vec3(clamp(ratio * 0.9, 0.0, 1.0), clamp(ratio * 0.9, 0.0, 1.0),clamp(ratio * 0.9, 0.0, 1.0));
+                            
+                            fragColor = vec4(color, 1.0);
+                        }
+                    `,
+                    glslVersion: THREE.GLSL3
+                });
+
+                // Apply the shader
+                mesh.material = areaShader;
+
+                // After the first render, we need to copy the screen-space areas
+                if (!mesh.userData.initialAreasCalculated) {
+                    requestAnimationFrame(() => {
+                        console.log("Capturing initial screen-space areas");
+
+                        // Toggle the flag in both the mesh and shader
+                        mesh.userData.initialAreasCalculated = true;
+                        areaShader.uniforms.isFirstFrame.value = 0.0;
+
+                        // Remember current camera position to reference initial viewing conditions
+                        mesh.userData.initialCameraPosition = camera.position.clone();
+                        mesh.userData.initialCameraRotation = camera.rotation.clone();
+
+                        // Re-render to update the shader with the new state
+                        renderer.render(scene, camera);
+
+                        console.log("Switched to area comparison mode");
+                    });
+                }
+            }
+
+            usingCustomShader = !usingCustomShader;
+        }
+
+        // Add a button to toggle the material
+        const toggleButton = document.createElement('button');
+        toggleButton.textContent = 'Toggle inpaint shader';
+        toggleButton.style.position = 'absolute';
+        toggleButton.style.top = '10px';
+        toggleButton.style.right = '10px';
+        toggleButton.style.padding = '8px 16px';
+        toggleButton.style.zIndex = '100';
+        toggleButton.addEventListener('click', toggleMaterial);
+        document.body.appendChild(toggleButton);
+
+        // Create a capture button
+        const captureButton = document.createElement('button');
+        captureButton.textContent = 'Capture Both Views';
+        captureButton.style.position = 'absolute';
+        captureButton.style.top = '50px'; // Position below the toggle button
+        captureButton.style.right = '10px';
+        captureButton.style.padding = '8px 16px';
+        captureButton.style.zIndex = '100';
+        captureButton.addEventListener('click', captureBothViews);
+        document.body.appendChild(captureButton);
+
+        // Function to capture both shader views
+        async function captureBothViews() {
+            if (!mesh) {
+                console.warn('No model loaded to capture');
+                return;
+            }
+
+            // Remember current shader state
+            const wasUsingCustomShader = usingCustomShader;
+
+            // Helper function to capture current view
+            function captureView() {
+                return new Promise(resolve => {
+                    // Force a render
+                    renderer.render(scene, camera);
+
+                    // Convert the canvas to a data URL
+                    const dataUrl = renderer.domElement.toDataURL('image/png');
+
+                    // Create temporary link to download the image
+                    const link = document.createElement('a');
+                    link.href = dataUrl;
+                    link.download = `model_${usingCustomShader ? 'custom' : 'normal'}_shader.png`;
+
+                    // Trigger download
+                    link.click();
+
+                    // Small delay to ensure capture completes
+                    setTimeout(resolve, 100);
+                });
+            }
+
+            try {
+                // If using custom shader, capture it first
+                if (usingCustomShader) {
+                    await captureView();
+                    toggleMaterial(); // Switch to normal shader
+                    await captureView();
+                    toggleMaterial(); // Switch back to custom shader
+                } else {
+                    // If using normal shader, capture it first
+                    await captureView();
+                    toggleMaterial(); // Switch to custom shader
+                    await captureView();
+                    toggleMaterial(); // Switch back to normal shader
+                }
+
+                // Ensure we return to the original shader state
+                if (wasUsingCustomShader !== usingCustomShader) {
+                    toggleMaterial();
+                }
+
+                console.log('Both views captured successfully');
+            } catch (error) {
+                console.error('Error capturing views:', error);
+            }
+        }
+
+        // Add keyboard shortcut for capture (press 'C')
+        document.addEventListener('keydown', (event) => {
+            if (event.key.toLowerCase() === 'c') {
+                captureBothViews();
+            }
+        });
+
+        // Update the animation loop to handle shader toggling only on specific cycles
+        function animate() {
+            requestAnimationFrame(animate);
+            frameCount++;
+
+            // Existing shader update code - only run when custom shader is active
+            if (mesh && usingCustomShader && hasCalculatedInitialCounts && frameCount % updateInterval === 0) {
+                try {
+                    const geometry = mesh.geometry;
+                    const triangleCount = geometry.index ? geometry.index.count / 3 : geometry.attributes.position.count / 3;
+
+                    // Check if we've already stored initial areas
+                    const hasInitialAreas = geometry.attributes.initialArea !== undefined;
+
+                    // If this is the first time, we need to create the attribute
+                    if (!hasInitialAreas) {
+                        console.log("Creating initialArea attribute for the first time");
+
+                        // Create arrays to store the per-vertex area values
+                        const vertexCount = geometry.attributes.position.count;
+                        const initialAreaArray = new Float32Array(vertexCount);
+
+                        // Create the attribute (we'll populate it in the shader)
+                        geometry.setAttribute('initialArea', new THREE.BufferAttribute(initialAreaArray, 1));
+
+                        // Flag to track initialization
+                        mesh.userData.initialAreasCalculated = false;
+                    }
+
+                    // Create shader material that handles both initialization and visualization
+                    const areaShader = new THREE.ShaderMaterial({
+                        uniforms: {
+                            isFirstFrame: { value: !mesh.userData.initialAreasCalculated ? 1.0 : 0.0 },
+                            sigmoidSteepness: { value: 5.0 }
+                        },
+                        vertexShader: `
+                            in float triangleId;
+                            in float initialArea;
+                            in vec3 triangleV1;
+                            in vec3 triangleV2;
+                            in vec3 triangleV3;
+                            
+                            flat out float vTriangleId;
+                            flat out float vInitialArea;
+                            out vec4 vScreenPosition;
+                            flat out vec4 vScreenV1;
+                            flat out vec4 vScreenV2;
+                            flat out vec4 vScreenV3;
+                            
+                            void main() {
+                                vTriangleId = triangleId;
+                                vInitialArea = initialArea;
+                                
+                                // Calculate clip-space positions for all three vertices of the triangle
+                                vec4 clipV1 = projectionMatrix * modelViewMatrix * vec4(triangleV1, 1.0);
+                                vec4 clipV2 = projectionMatrix * modelViewMatrix * vec4(triangleV2, 1.0);
+                                vec4 clipV3 = projectionMatrix * modelViewMatrix * vec4(triangleV3, 1.0);
+                                
+                                // Store the clip-space positions to pass to the fragment shader
+                                vScreenV1 = clipV1;
+                                vScreenV2 = clipV2;
+                                vScreenV3 = clipV3;
+                                
+                                // Actual vertex position for this vertex
+                                vec4 worldPos = modelViewMatrix * vec4(position, 1.0);
+                                gl_Position = projectionMatrix * worldPos;
+                                vScreenPosition = gl_Position;
+                            }
+                        `,
+                        fragmentShader: `
+                            uniform float isFirstFrame;
+                            uniform float sigmoidSteepness;
+                            
+                            flat in float vTriangleId;
+                            flat in float vInitialArea;
+                            in vec4 vScreenPosition;
+                            flat in vec4 vScreenV1;
+                            flat in vec4 vScreenV2;
+                            flat in vec4 vScreenV3;
+                            
+                            out vec4 fragColor;
+                            
+                            // Function to calculate screen-space coordinates
+                            vec2 getScreenCoords(vec4 clipSpace) {
+                                vec3 ndc = clipSpace.xyz / clipSpace.w;
+                                return ndc.xy * 0.5 + 0.5;
+                            }
+                            
+                            // Function to calculate the screen-space area of a triangle
+                            float calculateScreenArea(vec4 p1, vec4 p2, vec4 p3) {
+                                // Convert to screen space coordinates
+                                vec2 s1 = getScreenCoords(p1);
+                                vec2 s2 = getScreenCoords(p2);
+                                vec2 s3 = getScreenCoords(p3);
+                                
+                                // Calculate area using cross product
+                                vec2 e1 = s2 - s1;
+                                vec2 e2 = s3 - s1;
+                                return abs(e1.x * e2.y - e1.y * e2.x) * 0.5;
+                            }
+                            
+                            // Sigmoid function for smooth transition
+                            float sigmoid(float x) {
+                                return 1.0 / (1.0 + exp(-x));
+                            }
+                            
+                            void main() {
+                                // Calculate the current triangle's screen-space area using the vertices passed from vertex shader
+                                float currentScreenArea = calculateScreenArea(vScreenV1, vScreenV2, vScreenV3);
+                                
+                                // Use triangle ID for initial debug visualization
+                                float triangleId = vTriangleId;
+                                
+                                // Rainbow color based on triangle ID for debugging
+                                vec3 rainbowColor = vec3(
+                                    0.5 + 0.5 * sin(triangleId * 0.1),
+                                    0.5 + 0.5 * sin(triangleId * 0.1 + 2.0),
+                                    0.5 + 0.5 * sin(triangleId * 0.1 + 4.0)
+                                );
+                                
+                                if (isFirstFrame > 0.5) {
+                                    // First frame - just show the triangle IDs and don't compare areas yet
+                                    fragColor = vec4(rainbowColor, 1.0);
+                                    return;
+                                }
+                                
+                                // Get the stored initial area value
+                                float initialArea = max(0.00001, vInitialArea);
+                                
+                                // Calculate ratio of current to initial area
+                                float ratio = currentScreenArea / initialArea;
+                                
+                                // Apply log transformation to make ratio changes more visible
+                                float logRatio = log(max(0.00001, ratio));
+                                
+                                // Use sigmoid to map to 0-1 range
+                                float t = sigmoid(sigmoidSteepness * logRatio);
+                                
+                                // Create color scale from blue (more visible) to red (less visible)
+                                vec3 color;
+                                if (t < 0.4) {
+                                    // Blue range - significantly more visible now
+                                    color = mix(
+                                        vec3(0.0, 0.0, 0.8), // Dark blue (much more visible)
+                                        vec3(0.2, 0.4, 0.8), // Light blue (somewhat more visible)
+                                        t / 0.4
+                                    );
+                                } else if (t < 0.6) {
+                                    // Neutral range - about the same visibility
+                                    color = mix(
+                                        vec3(0.2, 0.4, 0.8), // Light blue
+                                        vec3(0.8, 0.4, 0.2), // Light red
+                                        (t - 0.4) / 0.2
+                                    );
+                                } else {
+                                    // Red range - significantly less visible now
+                                    color = mix(
+                                        vec3(0.8, 0.4, 0.2), // Light red (somewhat less visible)
+                                        vec3(0.8, 0.0, 0.0), // Dark red (much less visible)
+                                        (t - 0.6) / 0.4
+                                    );
+                                }
+                                
+                                // Ensure minimum brightness
+                                color = max(color, vec3(0.2));
+                                
+                                // Uncomment for raw ratio testing:
+                                color = vec3(clamp(ratio * 0.9, 0.0, 1.0), clamp(ratio * 0.9, 0.0, 1.0),clamp(ratio * 0.9, 0.0, 1.0));
+                                
+                                fragColor = vec4(color, 1.0);
+                            }
+                        `,
+                        glslVersion: THREE.GLSL3
+                    });
+
+                    // Apply the shader
+                    mesh.material = areaShader;
+
+                    // After the first render, we need to copy the screen-space areas
+                    if (!mesh.userData.initialAreasCalculated) {
+                        requestAnimationFrame(() => {
+                            console.log("Capturing initial screen-space areas");
+
+                            // Toggle the flag in both the mesh and shader
+                            mesh.userData.initialAreasCalculated = true;
+                            areaShader.uniforms.isFirstFrame.value = 0.0;
+
+                            // Remember current camera position to reference initial viewing conditions
+                            mesh.userData.initialCameraPosition = camera.position.clone();
+                            mesh.userData.initialCameraRotation = camera.rotation.clone();
+
+                            // Re-render to update the shader with the new state
+                            renderer.render(scene, camera);
+
+                            console.log("Switched to area comparison mode");
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error in animation loop:", error);
+                }
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Easing function for smooth acceleration and deceleration
+        function easeInOutQuad(t) {
+            return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>
